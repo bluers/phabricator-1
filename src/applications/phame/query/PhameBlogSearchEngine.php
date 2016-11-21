@@ -47,6 +47,11 @@ final class PhameBlogSearchEngine
       'archived' => pht('Archived Blogs'),
       'all' => pht('All Blogs'),
     );
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['subscribed'] = pht('Subscribed Blogs');
+    }
+
     return $names;
   }
 
@@ -54,9 +59,15 @@ final class PhameBlogSearchEngine
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
+    $viewer_phid = $this->requireViewer()->getPHID();
+
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'subscribed':
+        $query->setQueryKey("all");
+        return $query
+          ->setParameter('constraints', array('subscribers' => array($viewer_phid)));
       case 'active':
         return $query->setParameter(
           'statuses', PhameBlog::STATUS_ACTIVE);
