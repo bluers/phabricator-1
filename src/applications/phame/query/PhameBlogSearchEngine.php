@@ -65,8 +65,8 @@ final class PhameBlogSearchEngine
       case 'all':
         return $query;
       case 'subscribed':
-        $query
-          ->setParameter('constraints', array('subscribers' => array($viewer_phid)));
+        $query->setParameter('constraints', array('subscribers' => array($viewer_phid)));
+        $query->setParameter('subscribers' => array($viewer_phid));
         return $query;
       case 'active':
         return $query->setParameter(
