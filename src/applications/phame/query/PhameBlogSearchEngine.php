@@ -59,13 +59,13 @@ final class PhameBlogSearchEngine
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
-    $viewer_phid = $this->requireViewer()->getPHID();
+    $viewer_phid = $this->requireViewer()->getUsername();
 
     switch ($query_key) {
       case 'all':
         return $query;
       case 'subscribed':
-        $query->setQueryKey("all");
+        $query->setQueryKey("");
         return $query
           ->setParameter('constraints', array('subscribers' => array($viewer_phid)));
       case 'active':
