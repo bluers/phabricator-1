@@ -66,8 +66,9 @@ final class PhameBlogSearchEngine
         return $query;
       case 'subscribed':
         $query->setQueryKey("");
-        return $query
+        $query
           ->setParameter('constraints', array('subscribers' => array($viewer_phid)));
+        return $query;
       case 'active':
         return $query->setParameter(
           'statuses', PhameBlog::STATUS_ACTIVE);
