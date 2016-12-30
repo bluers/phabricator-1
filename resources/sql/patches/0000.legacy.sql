@@ -607,7 +607,7 @@ CREATE TABLE `search_documentfield` (
   `auxPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
   `corpus` text,
   KEY `phid` (`phid`),
-  FULLTEXT KEY `corpus` (`corpus`)
+  FULLTEXT KEY `corpus` (`corpus`) WITH PARSER NGRAM
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

@@ -65,8 +65,7 @@ final class PhameBlogSearchEngine
       case 'all':
         return $query;
       case 'subscribed':
-        $query = $this->newQuery();
-        $query->setQueryKey($viewer_phid);
+        $query = $this->newSavedQuery();
         $query->setParameter('subscriberPHIDs', array($viewer_phid));
         return $query;
       case 'active':

@@ -10,5 +10,5 @@ CREATE TABLE {$NAMESPACE}_conpherence.conpherence_index (
   KEY `key_thread` (threadPHID),
   UNIQUE KEY `key_transaction` (transactionPHID),
   UNIQUE KEY `key_previous` (previousTransactionPHID),
-  FULLTEXT KEY `key_corpus` (corpus)
-) ENGINE=MyISAM DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+  FULLTEXT KEY `key_corpus` (corpus) WITH PARSER NGRAM
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};

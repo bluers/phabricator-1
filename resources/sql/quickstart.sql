@@ -2960,8 +2960,8 @@ CREATE TABLE `search_documentfield` (
   `auxPHID` varbinary(64) DEFAULT NULL,
   `corpus` longtext CHARACTER SET {$CHARSET_FULLTEXT} COLLATE {$COLLATE_FULLTEXT},
   KEY `phid` (`phid`),
-  FULLTEXT KEY `corpus` (`corpus`)
-) ENGINE=MyISAM DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+  FULLTEXT KEY `corpus` (`corpus`)  WITH PARSER NGRAM
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `search_documentrelationship` (
   `phid` varbinary(64) NOT NULL,
@@ -3957,7 +3957,7 @@ CREATE TABLE `conpherence_index` (
   UNIQUE KEY `key_transaction` (`transactionPHID`),
   UNIQUE KEY `key_previous` (`previousTransactionPHID`),
   KEY `key_thread` (`threadPHID`),
-  FULLTEXT KEY `key_corpus` (`corpus`)
+  FULLTEXT KEY `key_corpus` (`corpus`)  WITH PARSER NGRAM
 ) ENGINE=MyISAM DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `conpherence_participant` (
