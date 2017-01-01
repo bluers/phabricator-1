@@ -9,7 +9,7 @@ final class DiffusionGitCommandEngine
   }
 
   protected function newFormattedCommand($pattern, array $argv) {
-    $pattern = "git {$pattern}";
+    $pattern = "git -c diff.mnemonicprefix=false -c core.quotepath=false {$pattern}";
     return array($pattern, $argv);
   }
 
