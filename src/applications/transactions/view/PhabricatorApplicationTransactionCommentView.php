@@ -301,6 +301,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'spec' => $comment_action->getPHUIXControlSpecification(),
           'initialValue' => $comment_action->getInitialValue(),
           'groupKey' => $comment_action->getGroupKey(),
+          'conflictKey' => $comment_action->getConflictKey(),
         );
 
         $type_map[$key] = $comment_action;
@@ -347,10 +348,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
       $info_view = $this->getInfoView();
       if ($info_view) {
-        $info_box = id(new PHUIBoxView())
-          ->addMargin(PHUI::MARGIN_LARGE)
-          ->appendChild($info_view);
-        $form->appendChild($info_box);
+        $form->appendChild($info_view);
       }
 
       $form->appendChild($invisi_bar);

@@ -19,6 +19,18 @@ abstract class DifferentialRevisionActionTransaction
   abstract protected function validateAction($object, PhabricatorUser $viewer);
   abstract protected function getRevisionActionLabel();
 
+  public function getCommandKeyword() {
+    return null;
+  }
+
+  public function getCommandAliases() {
+    return array();
+  }
+
+  public function getCommandSummary() {
+    return null;
+  }
+
   protected function getRevisionActionOrder() {
     return 1000;
   }
@@ -73,6 +85,18 @@ abstract class DifferentialRevisionActionTransaction
 
         $group_key = $this->getRevisionActionGroupKey();
         $field->setCommentActionGroupKey($group_key);
+
+        // Currently, every revision action conflicts with every other
+        // revision action: for example, you can not simultaneously Accept and
+        // Reject a revision.
+
+        // Under some configurations, some combinations of actions are sort of
+        // technically permissible. For example, you could reasonably Reject
+        // and Abandon a revision if "anyone can abandon anything" is enabled.
+
+        // It's not clear that these combinations are actually useful, so just
+        // keep things simple for now.
+        $field->setActionConflictKey('revision.action');
       }
     }
 
