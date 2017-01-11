@@ -13,6 +13,7 @@ final class DifferentialDiff
   protected $revisionID;
   protected $authorPHID;
   protected $repositoryPHID;
+  protected $commitPHID;
 
   protected $sourceMachine;
   protected $sourcePath;
@@ -62,6 +63,7 @@ final class DifferentialDiff
         'branch' => 'text255?',
         'bookmark' => 'text255?',
         'repositoryUUID' => 'text64?',
+        'commitPHID' => 'phid?',
 
         // T6203/NULLABILITY
         // These should be non-null; all diffs should have a creation method
@@ -72,6 +74,9 @@ final class DifferentialDiff
       self::CONFIG_KEY_SCHEMA => array(
         'revisionID' => array(
           'columns' => array('revisionID'),
+        ),
+        'key_commit' => array(
+          'columns' => array('commitPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -500,6 +505,10 @@ final class DifferentialDiff
     }
 
     return null;
+  }
+
+  public function getHarbormasterPublishablePHID() {
+    return $this->getHarbormasterContainerPHID();
   }
 
   public function getBuildVariables() {
