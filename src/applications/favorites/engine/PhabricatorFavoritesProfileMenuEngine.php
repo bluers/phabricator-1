@@ -7,27 +7,32 @@ final class PhabricatorFavoritesProfileMenuEngine
     return true;
   }
 
-  protected function getItemURI($path) {
-    $object = $this->getProfileObject();
-    $custom = $this->getCustomPHID();
-
-    if ($custom) {
-      return "/favorites/personal/item/{$path}";
-    } else {
-      return "/favorites/global/item/{$path}";
-    }
+  public function getItemURI($path) {
+    return "/favorites/menu/{$path}";
   }
 
   protected function getBuiltinProfileItems($object) {
     $items = array();
+    $viewer = $this->getViewer();
 
-    $custom = $this->getCustomPHID();
+    $engines = PhabricatorEditEngine::getAllEditEngines();
+    $engines = msortv($engines, 'getQuickCreateOrderVector');
 
-    if ($custom) {
-      $items[] = $this->newItem()
-        ->setBuiltinKey(PhabricatorFavoritesConstants::ITEM_MANAGE)
-        ->setMenuItemKey(
-          PhabricatorFavoritesManageProfileMenuItem::MENUITEMKEY);
+    foreach ($engines as $engine) {
+      foreach ($engine->getDefaultQuickCreateFormKeys() as $form_key) {
+        $form_hash = PhabricatorHash::digestForIndex($form_key);
+        $builtin_key = "editengine.form({$form_hash})";
+
+        $properties = array(
+          'name' => null,
+          'formKey' => $form_key,
+        );
+
+        $items[] = $this->newItem()
+          ->setBuiltinKey($builtin_key)
+          ->setMenuItemKey(PhabricatorEditEngineProfileMenuItem::MENUITEMKEY)
+          ->setMenuItemProperties($properties);
+      }
     }
 
     return $items;

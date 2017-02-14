@@ -443,7 +443,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $operations_box = $this->buildOperationsBox($revision);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($monogram, $revision->getURI());
+    $crumbs->addTextCrumb($monogram);
     $crumbs->setBorder(true);
 
     $filetree_on = $viewer->compareUserSetting(
@@ -463,12 +463,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     Javelin::initBehavior('differential-user-select');
-
-    Javelin::initBehavior(
-      'differential-keyboard-navigation',
-      array(
-        'haunt' => null,
-      ));
+    Javelin::initBehavior('differential-keyboard-navigation');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

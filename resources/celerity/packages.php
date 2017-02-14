@@ -84,6 +84,9 @@ return array(
     'conpherence-thread-manager',
     'javelin-behavior-detect-timezone',
     'javelin-behavior-setup-check-https',
+    'javelin-behavior-aphlict-status',
+    'javelin-behavior-user-menu',
+    'phabricator-favicon',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -127,9 +130,7 @@ return array(
     'phui-spacing-css',
     'phui-form-css',
     'phui-icon-view-css',
-    'phui-profile-menu-css',
 
-    'phabricator-application-launch-view-css',
     'phabricator-action-list-view-css',
     'phui-property-list-view-css',
     'phui-tag-view-css',
@@ -195,7 +196,6 @@ return array(
     'javelin-behavior-differential-populate',
     'javelin-behavior-differential-diff-radios',
     'javelin-behavior-differential-comment-jump',
-    'javelin-behavior-differential-add-reviewers-and-ccs',
     'javelin-behavior-differential-keyboard-navigation',
     'javelin-behavior-aphront-drag-and-drop-textarea',
     'javelin-behavior-phabricator-object-selector',

@@ -20,9 +20,10 @@ final class PhabricatorDashboardAddPanelController
       return new Aphront404Response();
     }
 
-    $redirect_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+    $redirect_uri = $this->getApplicationURI(
+      'arrange/'.$dashboard->getID().'/');
 
-    $v_panel = $request->getStr('panel');
+    $v_panel = head($request->getArr('panel'));
     $e_panel = true;
     $errors = array();
     if ($request->isFormPost()) {
@@ -69,26 +70,19 @@ final class PhabricatorDashboardAddPanelController
         ->addCancelButton($redirect_uri);
     }
 
-    $panel_options = array();
-    foreach ($panels as $panel) {
-      $panel_options[$panel->getID()] = pht(
-        '%s %s',
-        $panel->getMonogram(),
-        $panel->getName());
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('column', $request->getInt('column'))
       ->appendRemarkupInstructions(
         pht('Choose a panel to add to this dashboard:'))
       ->appendChild(
-        id(new AphrontFormSelectControl())
+        id(new AphrontFormTokenizerControl())
+          ->setUser($this->getViewer())
+          ->setDatasource(new PhabricatorDashboardPanelDatasource())
+          ->setLimit(1)
           ->setName('panel')
           ->setLabel(pht('Panel'))
-          ->setValue($v_panel)
-          ->setError($e_panel)
-          ->setOptions($panel_options));
+          ->setValue($v_panel));
 
     return $this->newDialog()
       ->setTitle(pht('Add Panel'))

@@ -26,6 +26,10 @@ final class DifferentialRevisionCommandeerTransaction
     return 700;
   }
 
+  public function getActionName() {
+    return pht('Commandeered');
+  }
+
   public function getCommandKeyword() {
     return 'commandeer';
   }
@@ -37,7 +41,7 @@ final class DifferentialRevisionCommandeerTransaction
   }
 
   public function getCommandSummary() {
-    return pht('Commadeer a revision.');
+    return pht('Commandeer a revision.');
   }
 
   public function generateOldValue($object) {
