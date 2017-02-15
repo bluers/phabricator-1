@@ -14,7 +14,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
     PhabricatorSpacesInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorTokenReceiverInterface{
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -2569,6 +2570,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return array(
       id(new DiffusionRepositoryURIsSearchEngineAttachment())
         ->setAttachmentKey('uris'),
+    );
+  }
+
+  /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
     );
   }
 
