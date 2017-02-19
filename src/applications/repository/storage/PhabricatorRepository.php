@@ -58,6 +58,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $editPolicy;
   protected $pushPolicy;
 
+  protected $authorPHID;
+
   protected $versionControlSystem;
   protected $details = array();
   protected $credentialPHID;
