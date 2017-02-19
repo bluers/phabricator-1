@@ -58,8 +58,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $editPolicy;
   protected $pushPolicy;
 
-  protected $authorPHID;
-
   protected $versionControlSystem;
   protected $details = array();
   protected $credentialPHID;
@@ -2579,7 +2577,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getUsersToNotifyOfTokenGiven() {
     return array(
-      $this->getAuthorPHID(),
+      null,
     );
   }
 
