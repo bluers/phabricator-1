@@ -28,8 +28,8 @@ final class DiffusionDownloadController extends DiffusionController {
 
     $tempdir_proj = sprintf("%s/%s/", $tempdir, rand());
     exec(sprintf("mkdir -p %s", $tempdir_proj));
-    exec("cd %s && git clone %s %s && cd %s && git checkout %s && cd .. && tar -cvzf %s.tar.gz %s",
-      $tempdir_proj, $localPath, $commit, $commit, $commit, $commit, $commit);
+    $cmd = "cd $tempdir_proj && git clone $localPath $commit && cd $commit && git checkout $commit && cd .. && tar -cvzf $commit.tar.gz $commit";
+    exec($cmd);
     $file_name = "$tempdir_proj"."$commit.tar.gz";
 
     return id(new AphrontFileResponse())
