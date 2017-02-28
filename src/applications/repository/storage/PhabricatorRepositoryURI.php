@@ -230,7 +230,7 @@ final class PhabricatorRepositoryURI
     $is_svn = $this->getRepository()->isSVN();
     $credential_phid = $this->getCredentialPHID();
 
-    if ($is_http && !$is_svn && $credential_phid) {
+    if ($is_http /*&& !$is_svn*/ && $credential_phid) {
       $key = PassphrasePasswordKey::loadFromPHID(
         $credential_phid,
         PhabricatorUser::getOmnipotentUser());
