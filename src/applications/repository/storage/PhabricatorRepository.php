@@ -760,6 +760,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     switch ($action) {
       case 'change':
       case 'history':
+      case 'download':
       case 'browse':
       case 'lastmodified':
       case 'tags':
