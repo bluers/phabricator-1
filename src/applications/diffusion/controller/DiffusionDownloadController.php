@@ -33,7 +33,7 @@ final class DiffusionDownloadController extends DiffusionController {
     $file_name = "$tempdir_proj"."$commit.tar.gz";
 
     return id(new AphrontFileResponse())
-      ->setDownload($file_name)
+      ->setDownload("$name-$commit.tar.gz")
       ->setMimeType('application/gzip')
       ->setContent(file_get_contents($file_name));
   }
