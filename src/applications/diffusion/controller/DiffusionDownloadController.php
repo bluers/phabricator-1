@@ -30,7 +30,12 @@ final class DiffusionDownloadController extends DiffusionController {
     exec(sprintf("mkdir -p %s", $tempdir_proj));
     exec("cd %s && git clone %s %s && cd %s && git checkout %s && cd .. && tar -cvzf %s.tar.gz %s",
       $tempdir_proj, $localPath, $commit, $commit, $commit, $commit, $commit);
-    http_send_file(sprintf("$tempdir_proj"."$commit.tar.gz"));
+    $file_name = "$tempdir_proj"."$commit.tar.gz";
+
+    return id(new AphrontFileResponse())
+      ->setDownload($file_name)
+      ->setMimeType('application/gzip')
+      ->setContent(file_get_contents($file_name));
   }
 
 
