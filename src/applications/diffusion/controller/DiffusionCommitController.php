@@ -807,12 +807,6 @@ final class DiffusionCommitController extends DiffusionController {
       ->setIcon('fa-download');
     $curtain->addAction($action);
 
-    $action = id(new PhabricatorActionView())
-      ->setName(pht('Download tar.gz'))
-      ->setHref($request->getRequestURI()->alter('tgz', true))
-      ->setIcon('fa-download');
-    $curtain->addAction($action);
-
     $relationship_list = PhabricatorObjectRelationshipList::newForObject(
       $viewer,
       $commit);
