@@ -707,7 +707,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         (string)$uri->getDisplayURI(),
         $repository->getCloneName());
     } else {
-      $display = csprintf('%R', (string)$uri->getDisplayURI());
+      $display = (string)$uri->getDisplayURI();
     }
 
     $display = (string)$display;
