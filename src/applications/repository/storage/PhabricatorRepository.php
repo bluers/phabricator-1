@@ -682,6 +682,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $action = idx($params, 'action');
     switch ($action) {
       case 'history':
+      case 'download':
       case 'browse':
       case 'change':
       case 'lastmodified':
