@@ -1676,10 +1676,15 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setHref($history_uri)
         ->setIcon('fa-list'));
 
+    $download_uri = $drequest->generateURI(
+      array(
+        'action' => 'download',
+      ));
+
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download %s %s zip release', $repository->getName(), $drequest->getSymbolicCommit()))
-        ->setHref($history_uri)
+        ->setHref($download_uri)
         ->setIcon('fa-download'));
 
     $behind_head = $drequest->getSymbolicCommit();
