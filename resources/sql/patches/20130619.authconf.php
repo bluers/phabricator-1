@@ -7,6 +7,12 @@ $config_map = array(
     'type' => 'ldap',
     'domain' => 'self',
   ),
+  'PhabricatorMUSICAuthProvider'           => array(
+    'enabled' => 'music.auth-enabled',
+    'registration' => true,
+    'type' => 'music',
+    'domain' => 'self',
+  ),
   'PhabricatorAuthProviderOAuthDisqus'    => array(
     'enabled' => 'disqus.auth-enabled',
     'registration' => 'disqus.registration-enabled',
