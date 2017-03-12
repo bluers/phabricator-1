@@ -37,7 +37,7 @@ final class PhabricatorTokensCurtainExtension
     foreach ($tokens_given as $token_given) {
       $token = $token_given->getToken();
 
-      $tokensScoreAverage = $tokensScoreAverage + $scores[phid_get_subtype($token->getPHID())];
+      $tokensScoreAverage = $tokensScoreAverage + $scores[substr($token->getPHID(), 10)];
 
       $aural = javelin_tag(
         'span',
