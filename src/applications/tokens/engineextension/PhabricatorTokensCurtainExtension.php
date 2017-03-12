@@ -69,7 +69,7 @@ final class PhabricatorTokensCurtainExtension
       'span',
       array(
         'class' => 'phabricator-handle-tag-list-item',
-        ), pht('Tokens: %s', sprintf("%.2f/5", $tokensScoreAverage)));
+        ), pht('Average Score: %s', sprintf("%.2f/5", $tokensScoreAverage)));
 
     return $this->newPanel()
       ->setHeaderText(pht('Tokens'))

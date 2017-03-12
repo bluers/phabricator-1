@@ -205,9 +205,7 @@ final class PhabricatorRepositorySearchEngine
         $tokensScoreAverage = $tokensScoreAverage*1.0/count($tokens_given);
 
         $score =  pht('Tokens: %s', sprintf("%.2f/5", $tokensScoreAverage));
-        $item->addIcon($score, $score, array(
-          'class' => 'phabricator-handle-tag-list-item',
-        ));
+        $item->addIcon($score, $score);
       }
 
       $size = $repository->getCommitCount();
