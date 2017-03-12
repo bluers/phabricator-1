@@ -27,15 +27,15 @@ final class PhabricatorTokenQuery
 
   private function getBuiltinTokens() {
     $specs = array(
-      array('like-1', pht('Like')),
-      array('like-2', pht('Dislike')),
-      array('heart-1', pht('Love')),
-      array('heart-2', pht('Heartbreak')),
-      array('medal-1', pht('Orange Medal')),
-      array('medal-2', pht('Grey Medal')),
-      array('medal-3', pht('Yellow Medal')),
-      array('medal-4', pht('Manufacturing Defect?')),
-      array('coin-1', pht('Haypence')),
+      array('like-1', pht('Like')),//5
+      array('like-2', pht('Dislike')),//1
+      array('heart-1', pht('Love')),//5
+      array('heart-2', pht('Heartbreak')),//1
+      array('medal-1', pht('Orange Medal')),//2
+      array('medal-2', pht('Grey Medal')),//3
+      array('medal-3', pht('Yellow Medal')),//4
+      array('medal-4', pht('Manufacturing Defect?')),//0
+      /*array('coin-1', pht('Haypence')),
       array('coin-2', pht('Piece of Eight')),
       array('coin-3', pht('Doubloon')),
       array('coin-4', pht('Mountain of Wealth')),
@@ -50,7 +50,7 @@ final class PhabricatorTokenQuery
       array('emoji-5', pht('Cup of Joe')),
       array('emoji-6', pht('Hungry Hippo')),
       array('emoji-7', pht('Burninate')),
-      array('emoji-8', pht('Pirate Logo')),
+      array('emoji-8', pht('Pirate Logo')),*/
     );
 
     $type = PhabricatorTokenTokenPHIDType::TYPECONST;
