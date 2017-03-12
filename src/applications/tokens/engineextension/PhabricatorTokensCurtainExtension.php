@@ -29,9 +29,15 @@ final class PhabricatorTokensCurtainExtension
 
     Javelin::initBehavior('phabricator-tooltips');
 
+    $tokensScoreAverage = 0;
+    $scores = array('like-1' => 5, 'like-2' => 1, 'heart-1' => 5, 'heart-2' => 1, 'medal-1' => 2,
+      'medal-2' => 3, 'medal-3' => 4, 'medal-4' => 0);
     $list = array();
+    $list[] = array();
     foreach ($tokens_given as $token_given) {
       $token = $token_given->getToken();
+
+      $tokensScoreAverage = $tokensScoreAverage + $scores[phid_get_subtype($token->getPHID())];
 
       $aural = javelin_tag(
         'span',
@@ -57,6 +63,13 @@ final class PhabricatorTokensCurtainExtension
           $token->renderIcon(),
         ));
     }
+
+    $tokensScoreAverage = $tokensScoreAverage*1.0/count($tokens_given);
+    $list[0] = javelin_tag(
+      'span',
+      array(
+        'class' => 'phabricator-handle-tag-list-item',
+        ), sprintf("%.2f/5", $tokensScoreAverage));
 
     return $this->newPanel()
       ->setHeaderText(pht('Tokens'))
