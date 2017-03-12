@@ -188,6 +188,28 @@ final class PhabricatorRepositorySearchEngine
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()));
 
+      $tokens_given = id(new PhabricatorTokenGivenQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(array($repository->getPHID()))
+        ->execute();
+      if ($tokens_given) {
+        $tokensScoreAverage = 0;
+        $scores = array('like-1' => 5, 'like-2' => 1, 'heart-1' => 5, 'heart-2' => 1, 'medal-1' => 2,
+          'medal-2' => 3, 'medal-3' => 4, 'medal-4' => 0);
+
+        foreach ($tokens_given as $token_given) {
+          $token = $token_given->getToken();
+
+          $tokensScoreAverage = $tokensScoreAverage + $scores[substr($token->getPHID(), 10)];
+        }
+        $tokensScoreAverage = $tokensScoreAverage*1.0/count($tokens_given);
+
+        $score =  sprintf("%.2f/5", $tokensScoreAverage);
+        $item->addIcon($score, $score, array(
+          'class' => 'phabricator-handle-tag-list-item',
+        ));
+      }
+
       $size = $repository->getCommitCount();
       if ($size) {
         $history_uri = $repository->generateURI(
