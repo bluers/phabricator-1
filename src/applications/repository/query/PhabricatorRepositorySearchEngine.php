@@ -216,6 +216,18 @@ final class PhabricatorRepositorySearchEngine
             ->setHandles($project_handles));
       }
 
+      $symbol_languages = $repository->getSymbolLanguages();
+
+      foreach ($symbol_languages as $symbol_language){
+        $item->addAttribute(
+          phutil_tag(
+            'span',
+            array(
+              'class' => "phabricator-handle-tag-list-item",
+            ),
+            pht("$symbol_language")));
+      }
+
       if (!$repository->isTracked()) {
         $item->setDisabled(true);
         $item->addIcon('disable-grey', pht('Inactive'));
