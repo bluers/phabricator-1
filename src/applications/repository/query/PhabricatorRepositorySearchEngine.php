@@ -258,8 +258,8 @@ final class PhabricatorRepositorySearchEngine
       }
 
       $view = id(new PHUITwoColumnView())
+        ->setHeader($item)
         ->setMainColumn(array(
-          $item
         ))
         ->setFooter($content);
       $list->addItem($view);

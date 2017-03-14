@@ -32,7 +32,7 @@ final class PHUITwoColumnView extends AphrontTagView {
     return $this;
   }
 
-  public function setHeader(PHUIHeaderView $header) {
+  public function setHeader($header) {
     $this->header = $header;
     return $this;
   }
