@@ -257,9 +257,15 @@ final class PhabricatorRepositorySearchEngine
         $item->addIcon('fa-clock-o indigo', pht('Importing...'));
       }
 
+      $property_table = $this->buildPropertiesTable($repository);
+      $description = $this->buildDescriptionView($repository);
+
       $view = id(new PHUITwoColumnView())
-        ->setHeader($item)
+       // ->setHeader($item)
         ->setMainColumn(array(
+          item,
+          $description,
+          $property_table
         ))
         ->setFooter($content);
       $list->addItem($view);
@@ -399,5 +405,108 @@ final class PhabricatorRepositorySearchEngine
     }
 
     return true;
+  }
+
+  private function buildDescriptionView(PhabricatorRepository $repository) {
+    $viewer = $this->requireViewer();
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $description = $repository->getDetail('description');
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($viewer, $description);
+      $view->addTextContent($description);
+      return id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Description'))
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->appendChild($view);
+    }
+    return null;
+  }
+
+  private function buildPropertiesTable(PhabricatorRepository $repository) {
+    $viewer = $this->requireViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $display_never = PhabricatorRepositoryURI::DISPLAY_NEVER;
+
+    $uris = $repository->getURIs();
+    foreach ($uris as $uri) {
+      if ($uri->getIsDisabled()) {
+        continue;
+      }
+
+      if ($uri->getEffectiveDisplayType() == $display_never) {
+        continue;
+      }
+
+      if ($repository->isSVN()) {
+        $label = pht('Checkout');
+      } else {
+        $label = pht('Clone');
+      }
+
+      $view->addProperty(
+        $label,
+        $this->renderCloneURI($repository, $uri));
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($view);
+
+    $info = null;
+    $params = array(
+      'repository' => $repository->getID(),
+      'user' => $viewer,
+      'blob' => null,
+      'commit' => null,
+      'path' => null,
+      'line' => null,
+      'branch' => null,
+      'lint' => null,
+    );
+
+    $drequest = DiffusionRequest::newFromDictionary($params);
+
+    // Try to load alternatives. This may fail for repositories which have not
+    // cloned yet. If it does, just ignore it and continue.
+    try {
+      $alternatives = $drequest->getRefAlternatives();
+    } catch (ConduitClientException $ex) {
+      $alternatives = array();
+    }
+
+    if ($alternatives) {
+      $message = array(
+        pht(
+          'The ref "%s" is ambiguous in this repository.',
+          $drequest->getBranch()),
+        ' ',
+        phutil_tag(
+          'a',
+          array(
+            'href' => $drequest->generateURI(
+              array(
+                'action' => 'refs',
+              )),
+          ),
+          pht('View Alternatives')),
+      );
+
+      $messages = array($message);
+
+      $info = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(array($message));
+
+      $box->setInfoView($info);
+    }
+
+
+    return $box;
   }
 }
