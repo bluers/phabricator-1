@@ -58,7 +58,7 @@ final class PHUIObjectItemListView extends AphrontTagView {
     return $this;
   }
 
-  public function addItem(PHUIObjectItemView $item) {
+  public function addItem($item) {
     $this->items[] = $item;
     return $this;
   }

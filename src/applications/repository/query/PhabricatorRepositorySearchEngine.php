@@ -308,33 +308,6 @@ final class PhabricatorRepositorySearchEngine
       return $view;
   }
 
-  private function loadGitTagList($repository) {
-
-    $refs = id(new DiffusionLowLevelGitRefQuery())
-      ->setRepository($repository)
-      ->withRefTypes(
-        array(
-          PhabricatorRepositoryRefCursor::TYPE_TAG,
-        ))
-      ->execute();
-
-    $tags = array();
-    foreach ($refs as $ref) {
-      $fields = $ref->getRawFields();
-      $tag = id(new DiffusionRepositoryTag())
-        ->setAuthor($fields['author'])
-        ->setEpoch($fields['epoch'])
-        ->setCommitIdentifier($ref->getCommitIdentifier())
-        ->setName($ref->getShortName())
-        ->setDescription($fields['subject'])
-        ->setType('git/'.$fields['objecttype']);
-
-      $tags[] = $tag;
-    }
-
-    return $tags;
-  }
-
   private function buildTagsView($repository){
     if ($this->needTagFuture($repository)) {
 
