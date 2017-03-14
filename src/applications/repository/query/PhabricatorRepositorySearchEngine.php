@@ -257,6 +257,16 @@ final class PhabricatorRepositorySearchEngine
         $item->addIcon('fa-clock-o indigo', pht('Importing...'));
       }
 
+      $uris = id(new PhabricatorRepositoryURIQuery())
+        ->setViewer($viewer)
+        ->withRepositories($repositories)
+        ->execute();
+      $uri_groups = mgroup($uris, 'getRepositoryPHID');
+      foreach ($repositories as $repository) {
+        $repository_uris = idx($uri_groups, $repository->getPHID(), array());
+        $repository->attachURIs($repository_uris);
+      }
+
       $property_table = $this->buildPropertiesTable($repository);
       $description = $this->buildDescriptionView($repository);
 
