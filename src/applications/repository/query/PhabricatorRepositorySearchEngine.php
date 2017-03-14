@@ -361,7 +361,31 @@ final class PhabricatorRepositorySearchEngine
         ->setTags($tags)
         ->setCommits($commits);
 
-      return $view;
+      $panel = new PHUIObjectBoxView();
+      $header = new PHUIHeaderView();
+      $header->setHeader(pht('Releases'));
+
+      if ($more_tags) {
+        $header->setSubheader(
+          pht('Showing the %d most recent tags.', $tag_limit));
+      }
+
+      $button = new PHUIButtonView();
+      $button->setText(pht('Show All Releases'));
+      $button->setTag('a');
+      $button->setIcon('fa-tag');
+      $button->setHref($drequest->generateURI(
+        array(
+          'action' => 'tags',
+        )));
+
+      $header->addActionLink($button);
+
+      $panel->setHeader($header);
+      $panel->setTable($view);
+      $panel->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
+
+      return $panel;
     }
 
     return null;
