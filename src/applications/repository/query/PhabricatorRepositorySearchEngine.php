@@ -429,7 +429,6 @@ final class PhabricatorRepositorySearchEngine
 
     $display_never = PhabricatorRepositoryURI::DISPLAY_NEVER;
 
-    $repository->needURIs();
     $uris = $repository->getURIs();
     foreach ($uris as $uri) {
       if ($uri->getIsDisabled()) {
