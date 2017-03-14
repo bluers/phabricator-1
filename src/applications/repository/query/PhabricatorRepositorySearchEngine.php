@@ -261,13 +261,10 @@ final class PhabricatorRepositorySearchEngine
       $description = $this->buildDescriptionView($repository);
 
       $view = id(new PHUITwoColumnView())
-       // ->setHeader($item)
+        ->setHeader($item)
         ->setMainColumn(array(
-          item,
-          $description,
-          $property_table
         ))
-        ->setFooter($content);
+        ->setFooter(array($description, $property_table, $content));
       $list->addItem($view);
     }
 
