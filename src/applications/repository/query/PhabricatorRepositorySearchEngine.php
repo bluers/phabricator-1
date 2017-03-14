@@ -156,6 +156,16 @@ final class PhabricatorRepositorySearchEngine
 
     $viewer = $this->requireViewer();
 
+    $uris = id(new PhabricatorRepositoryURIQuery())
+      ->setViewer($viewer)
+      ->withRepositories($repositories)
+      ->execute();
+    $uri_groups = mgroup($uris, 'getRepositoryPHID');
+    foreach ($repositories as $repository) {
+      $repository_uris = idx($uri_groups, $repository->getPHID(), array());
+      $repository->attachURIs($repository_uris);
+    }
+
     $list = new PHUIObjectItemListView();
     foreach ($repositories as $repository) {
       $id = $repository->getID();
@@ -255,16 +265,6 @@ final class PhabricatorRepositorySearchEngine
         $item->addIcon('disable-grey', pht('Inactive'));
       } else if ($repository->isImporting()) {
         $item->addIcon('fa-clock-o indigo', pht('Importing...'));
-      }
-
-      $uris = id(new PhabricatorRepositoryURIQuery())
-        ->setViewer($viewer)
-        ->withRepositories($repositories)
-        ->execute();
-      $uri_groups = mgroup($uris, 'getRepositoryPHID');
-      foreach ($repositories as $repository) {
-        $repository_uris = idx($uri_groups, $repository->getPHID(), array());
-        $repository->attachURIs($repository_uris);
       }
 
       $property_table = $this->buildPropertiesTable($repository);
