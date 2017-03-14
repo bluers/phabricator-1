@@ -516,4 +516,27 @@ final class PhabricatorRepositorySearchEngine
 
     return $box;
   }
+
+  private function renderCloneURI(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryURI $uri) {
+
+    if ($repository->isSVN()) {
+      $display = csprintf(
+        'svn checkout %R %R',
+        (string)$uri->getDisplayURI(),
+        $repository->getCloneName());
+    } else {
+      $display = (string)$uri->getDisplayURI();
+    }
+
+    $display = (string)$display;
+    $viewer = $this->requireViewer();
+
+    return id(new DiffusionCloneURIView())
+      ->setViewer($viewer)
+      ->setRepository($repository)
+      ->setRepositoryURI($uri)
+      ->setDisplayURI($display);
+  }
 }
