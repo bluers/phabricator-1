@@ -371,7 +371,7 @@ final class PhabricatorRepositorySearchEngine
         return null;
       }
 
-      $tag_limit = $this->getTagLimit();
+      $tag_limit = 15;
       $more_tags = (count($tags) > $tag_limit);
       $tags = array_slice($tags, 0, $tag_limit);
 
