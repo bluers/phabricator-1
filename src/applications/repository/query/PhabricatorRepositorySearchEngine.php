@@ -165,7 +165,7 @@ final class PhabricatorRepositorySearchEngine
         ->setObject($repository)
         ->setHeader($repository->getName())
         ->setObjectName($repository->getMonogram())
-        ->setHref($repository->getURI());*/
+        ->setHref($repository->getURI());
 
       $content = $this->buildTagsView($repository);
 
