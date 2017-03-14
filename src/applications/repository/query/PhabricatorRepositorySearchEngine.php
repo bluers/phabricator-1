@@ -165,7 +165,9 @@ final class PhabricatorRepositorySearchEngine
         ->setObject($repository)
         ->setHeader($repository->getName())
         ->setObjectName($repository->getMonogram())
-        ->setHref($repository->getURI());
+        ->setHref($repository->getURI());*/
+
+      $content = $this->buildTagsView($repository);
 
       $commit = $repository->getMostRecentCommit();
       if ($commit) {
@@ -255,7 +257,12 @@ final class PhabricatorRepositorySearchEngine
         $item->addIcon('fa-clock-o indigo', pht('Importing...'));
       }
 
-      $list->addItem($item);
+      $view = id(new PHUITwoColumnView())
+        ->setMainColumn(array(
+          $item
+        ))
+        ->setFooter($content);
+      $list->addItem($view);
     }
 
     $result = new PhabricatorApplicationSearchResultView();
@@ -301,4 +308,99 @@ final class PhabricatorRepositorySearchEngine
       return $view;
   }
 
+  private function loadGitTagList($repository) {
+
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->withRefTypes(
+        array(
+          PhabricatorRepositoryRefCursor::TYPE_TAG,
+        ))
+      ->execute();
+
+    $tags = array();
+    foreach ($refs as $ref) {
+      $fields = $ref->getRawFields();
+      $tag = id(new DiffusionRepositoryTag())
+        ->setAuthor($fields['author'])
+        ->setEpoch($fields['epoch'])
+        ->setCommitIdentifier($ref->getCommitIdentifier())
+        ->setName($ref->getShortName())
+        ->setDescription($fields['subject'])
+        ->setType('git/'.$fields['objecttype']);
+
+      $tags[] = $tag;
+    }
+
+    return $tags;
+  }
+
+  private function buildTagsView($repository){
+    if ($this->needTagFuture($repository)) {
+
+      $viewer = $this->requireViewer();
+      $params = array(
+        'repository' => $repository->getID(),
+        'user' => $viewer,
+        'blob' => null,
+        'commit' => null,
+        'path' => null,
+        'line' => null,
+        'branch' => null,
+        'lint' => null,
+      );
+
+      $drequest = DiffusionRequest::newFromDictionary($params);
+
+      $user = $viewer;
+      $method = 'diffusion.tagsquery';
+
+      $tags = DiffusionQuery::callConduitWithDiffusionRequest(
+        $user,
+        $drequest,
+        $method,
+        array(
+          // On the home page, we want to find tags on any branch.
+          'commit' => null,
+          'limit' => 15 + 1,
+        ), true)->resolve();
+
+
+      $tags = DiffusionRepositoryTag::newFromConduit($tags);
+      if (!$tags) {
+        return null;
+      }
+
+      $tag_limit = $this->getTagLimit();
+      $more_tags = (count($tags) > $tag_limit);
+      $tags = array_slice($tags, 0, $tag_limit);
+
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
+        ->withRepository($repository)
+        ->needCommitData(true)
+        ->execute();
+
+      $view = id(new DiffusionTagListView())
+        ->setUser($viewer)
+        ->setDiffusionRequest($drequest)
+        ->setTags($tags)
+        ->setCommits($commits);
+
+      return $view;
+    }
+
+    return null;
+  }
+  private function needTagFuture($repository) {
+
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // No tags in SVN.
+        return false;
+    }
+
+    return true;
+  }
 }

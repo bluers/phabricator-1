@@ -73,8 +73,8 @@ final class PhabricatorTokensCurtainExtension
 
     return $this->newPanel()
       ->setHeaderText(pht('Tokens'))
-      ->setOrder(30000)
-      ->appendChild($list);
+      ->setOrder(30000);
+     // ->appendChild($list); 只显示平均得分，不再显示列表
   }
 
 }
