@@ -1,8 +1,21 @@
 <?php
 
-class PHUIObjectItemView extends AphrontTagView {
+/**
+ * Created by IntelliJ IDEA.
+ * User: jimmy
+ * Date: 2017/3/16
+ * Time: 下午8:53
+ */
+class PHUIRepositoryObjectItemView extends PHUIObjectItemView
+{
 
   private $objectName;
+  private $score;
+  private $symbolLanguages;
+  private $dateCreated;
+  private $descriptionView;
+  private $contributer;
+  private $owner;
   private $header;
   private $subhead;
   private $href;
@@ -44,6 +57,35 @@ class PHUIObjectItemView extends AphrontTagView {
   public function setObjectName($name) {
     $this->objectName = $name;
     return $this;
+  }
+
+  public function setScore($score){
+    $this->score = $score;
+    return $this;
+  }
+
+  public function setSymbolLanguages($symbol){
+    $this->symbolLanguages = $symbol;
+    return $this;
+  }
+
+  public function setDateCreated($date){
+    $this->dateCreated = $date;
+    return $this;
+  }
+
+  public function setDescriptionView($view){
+    $this->descriptionView = $view;
+    return $this;
+  }
+
+  public function setContributer($contributer){
+    $this->contributer = $contributer;
+    return $this;
+  }
+
+  public function setOwner($owner){
+    $this->owner = $owner;
   }
 
   public function setGrippable($grippable) {
@@ -295,8 +337,126 @@ class PHUIObjectItemView extends AphrontTagView {
   protected function getTagContent() {
     $viewer = $this->getUser();
 
-    $content_classes = array();
-    $content_classes[] = 'phui-oi-content';
+    $repo_name = $this->header;
+
+    $header_link = phutil_tag(
+      $this->href ? 'a' : 'div',
+      array(
+        'href' => $this->href,
+        'class' => 'phui-oi-link',
+        'title' => $this->href,
+      ),
+      $repo_name);
+
+    $dateCreated = date('Y-m-d', $this->dateCreated);
+    $symbol = $this->symbolLanguages;
+    $attrs = null;
+    if ($this->attributes) {
+      $attrs = array();
+      $spacer = phutil_tag(
+        'span',
+        array(
+          'class' => 'phui-oi-attribute-spacer',
+        ),
+        "\xC2\xB7");
+      $first = true;
+      foreach ($this->attributes as $attribute) {
+        $attrs[] = phutil_tag(
+          'li',
+          array(
+            'class' => 'phui-oi-attribute',
+          ),
+          array(
+            ($first ? null : $spacer),
+            $attribute,
+          ));
+        $first = false;
+      }
+
+      $attrs = phutil_tag(
+        'ul',
+        array(
+          'class' => 'phui-oi-attributes',
+        ),
+        array(
+          $attrs,
+        ));
+    }
+
+    $href_content = $header_link->getHTMLContent();
+    $description = null;
+    if($this->descriptionView){
+      $description = $this->descriptionView->render();
+    }
+
+    $contributer = $this->contributer;
+    $owner = $this->owner;
+    if($owner && $owner != 'admin'){
+      $user = id(new PhabricatorUser())->loadOneWhere(
+        'phid = %s',
+        $owner);
+
+      if($user){
+        $owner = $user->getUserName();
+      }
+      else{
+        $policies = id(new PhabricatorPolicyQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($owner))
+          ->execute();
+
+        if($policies){
+          $policy = head($policies);
+          $rule_data = $policy->getRules();
+          $users = array();
+          $admin_user = null;
+          foreach ($rule_data as $rule){
+            if($rule["action"] == "allow" && $rule["rule"] == "PhabricatorUsersPolicyRule"){
+              foreach ($rule["value"] as $userPHID){
+                $actor = id(new PhabricatorUser())->loadOneWhere(
+                  'phid = %s',
+                  $userPHID);
+
+                if($actor->getUserName() == "admin"){
+                  $admin_user = $actor->getUserName()."(".$actor->getRealName().")";
+                }
+                $users[] = $actor->getUserName()."(".$actor->getRealName().")";
+              }
+            }
+          }//foreach ($rule_data as $rule)
+          if(count($users) > 0){
+            if(count($users) > 1){
+              $users = array_diff($users, [$admin_user]);
+            }
+            $owner = join($users, ", ");
+          }
+          else{
+            $owner = "多人";
+          }
+        }
+
+      }
+    }
+
+    $frame_html = "<div class=\"remarkup-table-wrap\"><table class=\"remarkup-table\" style=\"width:100%\">
+<tbody><tr><td>项目地址</td><td colspan='7'>$href_content</td></tr>
+<tr><td>创建者</td><td>$owner</td>
+<td>单位</td><td>$attrs</td>
+<td>开发语言</td><td>$symbol</td>
+<td>创建时间</td><td>$dateCreated</td>
+</tr>
+<tr><td>贡献者</td><td colspan='7'>$contributer</td></tr>
+<tr><td>功能描述</td><td colspan='7'>$description</td></tr>
+</tbody></table></div>";
+
+    $table = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      array(
+        new PhutilSafeHTML($frame_html),
+      ));
 
     $header_name = array();
 
@@ -334,6 +494,18 @@ class PHUIObjectItemView extends AphrontTagView {
       ),
       $this->header);
 
+    $score_tag = null;
+    if($this->score){
+      $score_tag =
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'phui-oi-objname',
+          ),
+          "  $this->score"
+      );
+    }
+
     // Wrap the header content in a <span> with the "slippery" sigil. This
     // prevents us from beginning a drag if you click the text (like "T123"),
     // but not if you click the white space after the header.
@@ -351,343 +523,8 @@ class PHUIObjectItemView extends AphrontTagView {
           $this->headIcons,
           $header_name,
           $header_link,
+          $score_tag,
         )));
-
-    $icons = array();
-    if ($this->icons) {
-      $icon_list = array();
-      foreach ($this->icons as $spec) {
-        $icon = $spec['icon'];
-        $icon = id(new PHUIIconView())
-          ->setIcon($icon)
-          ->addClass('phui-oi-icon-image');
-
-        if (isset($spec['attributes']['tip'])) {
-          $sigil = 'has-tooltip';
-          $meta = array(
-            'tip' => $spec['attributes']['tip'],
-            'align' => 'W',
-          );
-          $icon->addSigil($sigil);
-          $icon->setMetadata($meta);
-        }
-
-        $label = phutil_tag(
-          'span',
-          array(
-            'class' => 'phui-oi-icon-label',
-          ),
-          $spec['label']);
-
-        if (isset($spec['attributes']['href'])) {
-          $icon_href = phutil_tag(
-            'a',
-            array('href' => $spec['attributes']['href']),
-            array($icon, $label));
-        } else {
-          $icon_href = array($icon, $label);
-        }
-
-        $classes = array();
-        $classes[] = 'phui-oi-icon';
-        if (isset($spec['attributes']['class'])) {
-          $classes[] = $spec['attributes']['class'];
-        }
-
-        $icon_list[] = javelin_tag(
-          'li',
-          array(
-            'class' => implode(' ', $classes),
-          ),
-          $icon_href);
-      }
-
-      $icons[] = phutil_tag(
-        'ul',
-        array(
-          'class' => 'phui-oi-icons',
-        ),
-        $icon_list);
-    }
-
-    $handle_bar = null;
-    if ($this->handleIcons) {
-      $handle_bar = array();
-      foreach ($this->handleIcons as $handleicon) {
-        $handle_bar[] =
-          $this->renderHandleIcon($handleicon['icon'], $handleicon['label']);
-      }
-      $handle_bar = phutil_tag(
-        'li',
-        array(
-          'class' => 'phui-oi-handle-icons',
-        ),
-        $handle_bar);
-    }
-
-    $bylines = array();
-    if ($this->bylines) {
-      foreach ($this->bylines as $byline) {
-        $bylines[] = phutil_tag(
-          'div',
-          array(
-            'class' => 'phui-oi-byline',
-          ),
-          $byline);
-      }
-      $bylines = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-bylines',
-        ),
-        $bylines);
-    }
-
-    $subhead = null;
-    if ($this->subhead) {
-      $subhead = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-subhead',
-        ),
-        $this->subhead);
-    }
-
-    if ($icons) {
-      $icons = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-object-icon-pane',
-        ),
-        $icons);
-    }
-
-    $attrs = null;
-    if ($this->attributes || $handle_bar) {
-      $attrs = array();
-      $spacer = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-oi-attribute-spacer',
-        ),
-        "\xC2\xB7");
-      $first = true;
-      foreach ($this->attributes as $attribute) {
-        $attrs[] = phutil_tag(
-          'li',
-          array(
-            'class' => 'phui-oi-attribute',
-          ),
-          array(
-            ($first ? null : $spacer),
-            $attribute,
-          ));
-        $first = false;
-      }
-
-      $attrs = phutil_tag(
-        'ul',
-        array(
-          'class' => 'phui-oi-attributes',
-        ),
-        array(
-          $handle_bar,
-          $attrs,
-        ));
-    }
-
-    $status = null;
-    if ($this->statusIcon) {
-      $icon = $this->statusIcon;
-      $status = $this->renderStatusIcon($icon['icon'], $icon['label']);
-    }
-
-    $grippable = null;
-    if ($this->getGrippable()) {
-      $grippable = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-grip',
-        ),
-        '');
-    }
-
-    $content = phutil_tag(
-      'div',
-      array(
-        'class' => implode(' ', $content_classes),
-      ),
-      array(
-        $subhead,
-        $attrs,
-        $this->renderChildren(),
-      ));
-
-    $image = null;
-    if ($this->getImageURI()) {
-      $image = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-image',
-          'style' => 'background-image: url('.$this->getImageURI().')',
-        ),
-        '');
-    } else if ($this->getImageIcon()) {
-      $image = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-image-icon',
-        ),
-        $this->getImageIcon());
-    }
-
-    if ($image && $this->href) {
-      $image = phutil_tag(
-        'a',
-        array(
-          'href' => $this->href,
-        ),
-        $image);
-    }
-
-    /* Build a fake table */
-    $column0 = null;
-    if ($status) {
-      $column0 = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-col0',
-        ),
-        $status);
-    }
-
-    if ($this->badge) {
-      $column0 = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-col0 phui-oi-badge',
-        ),
-        $this->badge);
-    }
-
-    if ($this->countdownNum) {
-      $countdown = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-countdown-number',
-        ),
-        array(
-          phutil_tag_div('', $this->countdownNum),
-          phutil_tag_div('', $this->countdownNoun),
-        ));
-      $column0 = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-col0 phui-oi-countdown',
-        ),
-        $countdown);
-    }
-
-    $column1 = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-oi-col1',
-      ),
-      array(
-        $header,
-        $content,
-      ));
-
-    $column2 = null;
-    if ($icons || $bylines) {
-      $column2 = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-col2',
-        ),
-        array(
-          $icons,
-          $bylines,
-        ));
-    }
-
-    if ($this->launchButton) {
-      $column2 = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-col2 phui-oi-launch-button',
-        ),
-        array(
-          $this->launchButton,
-        ));
-    }
-
-    $table = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-oi-table',
-      ),
-      phutil_tag_div(
-        'phui-oi-table-row',
-        array(
-          $column0,
-          $column1,
-          $column2,
-        )));
-
-    $box = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-oi-content-box',
-      ),
-      array(
-        $grippable,
-        $table,
-      ));
-
-    $actions = array();
-    if ($this->actions) {
-      Javelin::initBehavior('phabricator-tooltips');
-
-      foreach (array_reverse($this->actions) as $action) {
-        $action->setRenderNameAsTooltip(true);
-        $actions[] = $action;
-      }
-      $actions = phutil_tag(
-        'ul',
-        array(
-          'class' => 'phui-oi-actions',
-        ),
-        $actions);
-    }
-
-    $frame_content = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-oi-frame-content',
-      ),
-      array(
-        $actions,
-        $image,
-        $box,
-      ));
-
-    $frame_cover = null;
-    if ($this->coverImage) {
-      $cover_image = phutil_tag(
-        'img',
-        array(
-          'src' => $this->coverImage,
-          'class' => 'phui-oi-cover-image',
-        ));
-
-      $frame_cover = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-oi-frame-cover',
-        ),
-        $cover_image);
-    }
 
     $frame = phutil_tag(
       'div',
@@ -695,11 +532,20 @@ class PHUIObjectItemView extends AphrontTagView {
         'class' => 'phui-oi-frame',
       ),
       array(
-        $frame_cover,
-        $frame_content,
+        $header,
+        $table,
       ));
 
-     return $frame;
+    $frame = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-two-column-content',
+      ),
+      array(
+        $frame
+      ));
+
+    return $frame;
   }
 
   private function renderStatusIcon($icon, $label) {
@@ -736,5 +582,4 @@ class PHUIObjectItemView extends AphrontTagView {
 
     return javelin_tag('span', $options, '');
   }
-
 }

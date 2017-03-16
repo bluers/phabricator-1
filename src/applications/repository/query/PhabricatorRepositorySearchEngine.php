@@ -170,13 +170,15 @@ final class PhabricatorRepositorySearchEngine
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
-      $item = id(new PHUIObjectItemView())
+      $item = id(new PHUIRepositoryObjectItemView())
         ->setUser($viewer)
         ->setObject($repository)
         ->setHeader($repository->getName())
         ->setObjectName($repository->getMonogram())
         ->setHref($repository->getURI());
 
+      $item->setDateCreated($repository->getDateCreated());
+      $item->setOwner($repository->getEditPolicy());
       $content = $this->buildTagsView($repository);
 
       $commit = $repository->getMostRecentCommit();
@@ -217,12 +219,12 @@ final class PhabricatorRepositorySearchEngine
         $tokensScoreAverage = $tokensScoreAverage*1.0/count($tokens_given);
 
         $score =  pht('Tokens: %s', sprintf("%.2f/5", $tokensScoreAverage));
-        $item->addIcon($score, $score);
+        $item->setScore($score);
       }
 
       $size = $repository->getCommitCount();
       if ($size) {
-        $history_uri = $repository->generateURI(
+        /*$history_uri = $repository->generateURI(
           array(
             'action' => 'history',
           ));
@@ -233,9 +235,10 @@ final class PhabricatorRepositorySearchEngine
             array(
               'href' => $history_uri,
             ),
-            pht('%s Commit(s)', new PhutilNumber($size))));
+            pht('%s Commit(s)', new PhutilNumber($size))));*/
+        $item->setContributer($this->getCommitAuthors($repository));
       } else {
-        $item->addAttribute(pht('No Commits'));
+        //$item->addAttribute(pht('No Commits'));
       }
 
       $project_handles = array_select_keys(
@@ -249,16 +252,8 @@ final class PhabricatorRepositorySearchEngine
       }
 
       $symbol_languages = $repository->getSymbolLanguages();
+      $item->setSymbolLanguages(join($symbol_languages, ","));
 
-      foreach ($symbol_languages as $symbol_language){
-        $item->addAttribute(
-          phutil_tag(
-            'span',
-            array(
-              'class' => "phabricator-handle-tag-list-item",
-            ),
-            pht("$symbol_language")));
-      }
 
       if (!$repository->isTracked()) {
         $item->setDisabled(true);
@@ -268,13 +263,14 @@ final class PhabricatorRepositorySearchEngine
       }
 
       $property_table = $this->buildPropertiesTable($repository);
-      $description = $this->buildDescriptionView($repository);
+      $description_view = $this->buildDescriptionView($repository);
+      $item->setDescriptionView($description_view);
 
       $view = id(new PHUITwoColumnView())
         ->setHeader($item)
         ->setMainColumn(array(
         ))
-        ->setFooter(array($description, $property_table, $content));
+        ->setFooter(array($property_table, $content));
       $list->addItem($view);
     }
 
@@ -319,6 +315,43 @@ final class PhabricatorRepositorySearchEngine
       ->addAction($new_button);
 
       return $view;
+  }
+
+  private function getCommitAuthors($repository){
+    $viewer = $this->requireViewer();
+    $params = array(
+      'repository' => $repository->getID(),
+      'user' => $viewer,
+      'blob' => null,
+      'commit' => null,
+      'path' => null,
+      'line' => null,
+      'branch' => null,
+      'lint' => null,
+    );
+
+    $drequest = DiffusionRequest::newFromDictionary($params);
+
+    $user = $viewer;
+    $method = 'diffusion.historyquery';
+    $commit = $repository->getMostRecentCommit()->getCommitIdentifier();
+
+    $history = DiffusionQuery::callConduitWithDiffusionRequest(
+      $user,
+      $drequest,
+      $method,
+      array(
+        // On the home page, we want to find tags on any branch.
+        'commit' => $commit,
+        'limit' => 15 + 1,
+      ), true)->resolve();
+
+    $authors = array();
+
+    foreach ($history["pathChanges"] as $history_item){
+      $authors[] = $history_item["commitData"]["authorName"];
+    }
+    return join(array_map('self::renderName', array_unique($authors)), ", ");
   }
 
   private function buildTagsView($repository){
@@ -423,10 +456,7 @@ final class PhabricatorRepositorySearchEngine
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
       $view->addTextContent($description);
-      return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Description'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->appendChild($view);
+      return $view;
     }
     return null;
   }
@@ -538,5 +568,25 @@ final class PhabricatorRepositorySearchEngine
       ->setRepository($repository)
       ->setRepositoryURI($uri)
       ->setDisplayURI($display);
+  }
+
+  final public static function renderName($name) {
+    $email = new PhutilEmailAddress($name);
+    if ($email->getDisplayName() && $email->getDomainName()) {
+      Javelin::initBehavior('phabricator-tooltips', array());
+      require_celerity_resource('aphront-tooltip-css');
+      return javelin_tag(
+        'span',
+        array(
+          'sigil' => 'has-tooltip',
+          'meta'  => array(
+            'tip'   => $email->getAddress(),
+            'align' => 'E',
+            'size'  => 'auto',
+          ),
+        ),
+        $email->getDisplayName());
+    }
+    return hsprintf('%s', $name);
   }
 }

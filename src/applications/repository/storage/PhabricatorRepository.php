@@ -83,7 +83,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $repository = id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy)
+      ->setEditPolicy($actor->getPHID())
       ->setPushPolicy($push_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID());
 
