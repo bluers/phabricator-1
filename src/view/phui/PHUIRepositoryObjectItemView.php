@@ -15,11 +15,13 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
   private $dateCreated;
   private $descriptionView;
   private $contributer;
+  private $cloneURL;
   private $owner;
   private $header;
   private $subhead;
   private $href;
   private $attributes = array();
+  private $organizations = array();
   private $icons = array();
   private $barColor;
   private $object;
@@ -81,6 +83,11 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
 
   public function setContributer($contributer){
     $this->contributer = $contributer;
+    return $this;
+  }
+
+  public function setCloneURL($url){
+    $this->cloneURL = $url;
     return $this;
   }
 
@@ -259,6 +266,13 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
     return $this;
   }
 
+  public function addOrganizations($attribute) {
+    if (!empty($attribute)) {
+      $this->organizations[] = $attribute;
+    }
+    return $this;
+  }
+
   public function setLaunchButton(PHUIButtonView $button) {
     $button->setSize(PHUIButtonView::SMALL);
     $this->launchButton = $button;
@@ -351,7 +365,7 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
     $dateCreated = date('Y-m-d', $this->dateCreated);
     $symbol = $this->symbolLanguages;
     $attrs = null;
-    if ($this->attributes) {
+    if ($this->organizations) {
       $attrs = array();
       $spacer = phutil_tag(
         'span',
@@ -360,7 +374,7 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
         ),
         "\xC2\xB7");
       $first = true;
-      foreach ($this->attributes as $attribute) {
+      foreach ($this->organizations as $attribute) {
         $attrs[] = phutil_tag(
           'li',
           array(
@@ -438,8 +452,9 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
       }
     }
 
+    $addr_html = $this->cloneURL->render()->getHTMLContent();
     $frame_html = "<div class=\"remarkup-table-wrap\"><table class=\"remarkup-table\" style=\"width:100%\">
-<tbody><tr><td>项目地址</td><td colspan='7'>$href_content</td></tr>
+<tbody><tr><td>项目地址</td><td colspan='7'>$addr_html</td></tr>
 <tr><td>创建者</td><td>$owner</td>
 <td>单位</td><td>$attrs</td>
 <td>开发语言</td><td>$symbol</td>

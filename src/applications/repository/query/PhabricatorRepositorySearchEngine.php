@@ -245,10 +245,33 @@ final class PhabricatorRepositorySearchEngine
         $handles,
         $repository->getProjectPHIDs());
       if ($project_handles) {
-        $item->addAttribute(
-          id(new PHUIHandleTagListView())
-            ->setSlim(true)
-            ->setHandles($project_handles));
+        $type_handles = array();
+        $org_handles = array();
+
+        foreach ($project_handles as $key => $value){
+          if($value->getIcon() == "fa-building"){
+            $org_handles[$key] = $value;
+          }
+          else{
+            $type_handles[$key] = $value;
+          }
+        }
+
+        if(count($org_handles) > 0){
+          $item->addOrganizations(
+            id(new PHUIHandleTagListView())
+              ->setSlim(true)
+              ->setHandles($org_handles));
+        }
+
+
+        if(count($type_handles) > 0){
+          $item->addAttribute(
+            id(new PHUIHandleTagListView())
+              ->setSlim(true)
+              ->setHandles($type_handles));
+        }
+
       }
 
       $symbol_languages = $repository->getSymbolLanguages();
@@ -263,6 +286,7 @@ final class PhabricatorRepositorySearchEngine
       }
 
       $property_table = $this->buildPropertiesTable($repository);
+      $item->setCloneURL($property_table);
       $description_view = $this->buildDescriptionView($repository);
       $item->setDescriptionView($description_view);
 
@@ -270,7 +294,7 @@ final class PhabricatorRepositorySearchEngine
         ->setHeader($item)
         ->setMainColumn(array(
         ))
-        ->setFooter(array($property_table, $content));
+        ->setFooter(array($content));
       $list->addItem($view);
     }
 
@@ -374,18 +398,24 @@ final class PhabricatorRepositorySearchEngine
       $user = $viewer;
       $method = 'diffusion.tagsquery';
 
-      $tags = DiffusionQuery::callConduitWithDiffusionRequest(
-        $user,
-        $drequest,
-        $method,
-        array(
-          // On the home page, we want to find tags on any branch.
-          'commit' => null,
-          'limit' => 15 + 1,
-        ), true)->resolve();
+      try{
+        $tags = DiffusionQuery::callConduitWithDiffusionRequest(
+          $user,
+          $drequest,
+          $method,
+          array(
+            // On the home page, we want to find tags on any branch.
+            'commit' => null,
+            'limit' => 15 + 1,
+          ), true)->resolve();
 
 
-      $tags = DiffusionRepositoryTag::newFromConduit($tags);
+        $tags = DiffusionRepositoryTag::newFromConduit($tags);
+      }
+      catch(Exception $exception){
+        $tags = null;
+      }
+
       if (!$tags) {
         return null;
       }
@@ -490,6 +520,8 @@ final class PhabricatorRepositorySearchEngine
         $this->renderCloneURI($repository, $uri));
     }
 
+    return $view;
+    /*
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
@@ -544,7 +576,7 @@ final class PhabricatorRepositorySearchEngine
     }
 
 
-    return $box;
+    return $box;*/
   }
 
   private function renderCloneURI(

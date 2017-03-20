@@ -205,6 +205,62 @@ final class PhabricatorAuthStartController
       $out,
     );
 
+
+    if(count($out) >= 1 && count($out[0]) > 1){
+
+      $content = array();
+
+      $list = id(new PHUIListView())
+        ->setType(PHUIListView::NAVBAR_LIST);
+      $selected = 0;
+
+      $node_ids = array();
+      foreach ($out[0] as $idx => $tab_spec) {
+        $node_ids[$idx] = celerity_generate_unique_node_id();
+      }
+
+      foreach ($out[0] as $idx => $tab_spec) {
+        $list->addMenuItem(
+          id(new PHUIListItemView())
+            ->setHref('#')
+            ->setSelected($idx == $selected)
+            ->addSigil('dashboard-tab-panel-tab')
+            ->setMetadata(array('idx' => $idx))
+            ->setName($tab_spec->getTitle()));
+
+        $panel = phutil_tag_div('dashboard-pane', $out[0][$idx]);
+
+        $content[] = phutil_tag(
+          'div',
+          array(
+            'id' => $node_ids[$idx],
+            'style' => ($idx == $selected) ? null : 'display: none',
+          ),
+          $panel);
+      }
+
+
+      $view = array(
+        $header,
+        $invite_message,
+        javelin_tag(
+          'div',
+          array(
+            'sigil' => 'dashboard-tab-panel-container',
+            'meta' => array(
+              'panels' => $node_ids,
+            ),
+          ),
+          array(
+            $list,
+            $content,
+          )),
+      );
+
+      Javelin::initBehavior('dashboard-tab-panel');
+
+    }
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
