@@ -1782,7 +1782,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)
-      ->needRelationships(true)
+      ->needReviewers(true)
       ->needFlags(true)
       ->needDrafts(true)
       ->execute();
