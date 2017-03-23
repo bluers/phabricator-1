@@ -1681,9 +1681,15 @@ final class DiffusionBrowseController extends DiffusionController {
         'action' => 'download',
       ));
 
+    $key = $repository->getPHID()."_".$drequest->getSymbolicCommit();
+    $download_count = PhabricatorRepositoryDownloads::getDownloads($key);
+    if($download_count > 9999){
+      $download_count = "9999+";
+    }
+
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Download %s %s zip release', $repository->getName(), $drequest->getSymbolicCommit()))
+        ->setName(pht('Download %s %s zip release', "", $drequest->getSymbolicCommit())."(".$download_count.")")
         ->setHref($download_uri)
         ->setIcon('fa-download'));
 

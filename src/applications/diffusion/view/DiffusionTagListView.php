@@ -33,6 +33,17 @@ final class DiffusionTagListView extends DiffusionView {
     $buildables = $this->loadBuildables($this->commits);
     $has_builds = false;
 
+    $download_keys = array();
+    foreach ($this->tags as $tag){
+      $download_keys[] = $repository->getPHID()."_".$tag->getName();
+    }
+
+    $downloads = id(new DiffusionCommitDownloadsQuery())->withKeys($download_keys)->setViewer($viewer)->execute();
+    $download_infos = array();
+    foreach ($downloads as $download){
+      $download_infos[$download->getKey()] = $download;
+    }
+
     $rows = array();
     foreach ($this->tags as $tag) {
       $commit = idx($this->commits, $tag->getCommitIdentifier());
@@ -94,6 +105,13 @@ final class DiffusionTagListView extends DiffusionView {
 
       $history = $this->linkTagHistory($tag->getName());
 
+      $download_key = $repository->getPHID()."_".$tag->getName();
+      $download = idx($download_infos, $download_key);
+      $download_count = "0";
+      if($download){
+        $download_count = $download->getCount();
+      }
+
       $rows[] = array(
         $history,
         $tag_link,
@@ -102,6 +120,7 @@ final class DiffusionTagListView extends DiffusionView {
         $author,
         $description,
         $viewer->formatShortDateTime($tag->getEpoch()),
+        $download_count
       );
     }
 
@@ -115,6 +134,7 @@ final class DiffusionTagListView extends DiffusionView {
           pht('Author'),
           pht('Description'),
           pht('Created'),
+          pht('Total Downloads'),
         ))
       ->setColumnClasses(
         array(

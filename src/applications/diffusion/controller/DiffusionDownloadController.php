@@ -32,6 +32,8 @@ final class DiffusionDownloadController extends DiffusionController {
     exec($cmd);
     $file_name = "$tempdir_proj"."$commit.tar.gz";
 
+    PhabricatorRepositoryDownloads::incrementDownloads($repo->getPHID()."_".$commit);
+
     return id(new AphrontFileResponse())
       ->setDownload("$name-$commit.tar.gz")
       ->setMimeType('application/gzip')

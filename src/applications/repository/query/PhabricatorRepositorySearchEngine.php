@@ -166,7 +166,107 @@ final class PhabricatorRepositorySearchEngine
       $repository->attachURIs($repository_uris);
     }
 
-    $list = new PHUIObjectItemListView();
+    $repositories_groupby = array();
+    $groupby = array();
+    foreach ($repositories as $repository) {
+      $project_handles = array_select_keys(
+        $handles,
+        $repository->getProjectPHIDs());
+      if ($project_handles) {
+        $type_handles = array();
+        $org_handles = array();
+
+        foreach ($project_handles as $key => $value){
+          if($value->getIcon() == "fa-building"){
+            $org_handles[$key] = $value;
+          }
+          else{
+            $type_handles[$key] = $value;
+            $groupby[$value->getName()] = $value;
+          }
+        }
+
+
+
+        if(count($type_handles) > 0){
+          //代码库有分类
+          foreach ($type_handles as $key => $handle){
+            $repos = $repositories_groupby[$handle->getName()];
+            if(!isset($repos) || $repos == null){
+              $repos = array();
+              $repos[] = $repository;
+              $repositories_groupby[$handle->getName()] = $repos;
+            }
+            else{
+              $repos[] = $repository;
+              $repositories_groupby[$handle->getName()] = $repos;
+            }
+          }
+
+        }
+        else{
+          //代码库属于默认分类
+          $repos = $repositories_groupby[""];
+          if(!isset($repos) || $repos == null){
+            $repos = array();
+            $repos[] = $repository;
+            $repositories_groupby[""] = $repos;
+          }
+          else{
+            $repos[] = $repository;
+            $repositories_groupby[""] = $repos;
+          }
+        }
+      }
+      else{
+        $repos = $repositories_groupby[""];
+        if(!isset($repos) || $repos == null){
+          $repos = array();
+          $repos[] = $repository;
+          $repositories_groupby[""] = $repos;
+        }
+        else{
+          $repos[] = $repository;
+          $repositories_groupby[""] = $repos;
+        }
+      }
+    }
+
+    $list_group = new PHUIObjectItemListView();
+
+    foreach ($repositories_groupby as $key => $repositores_group){
+
+
+      $list = new PHUIObjectItemListView();
+      $this->renderRepositories($repositores_group, $viewer, $handles, $list);
+
+      $groupby_header = new PHUIObjectBoxView();
+      if($key == ""){
+        $groupby_header->setHeaderText(pht("Default")."(".pht("Total %s", count($repositores_group)).")");
+      }
+      else{
+        $groupby_header->setHeaderText($key."(".pht("Total %s", count($repositores_group)).")");
+      }
+
+
+      $groupby_view = new PHUITwoColumnView();
+
+      $groupby_view->setHeader($groupby_header);
+      $groupby_view->setFooter($list);
+
+      $list_group->addItem($groupby_view);
+    }
+
+
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list_group);
+    $result->setNoDataString(pht('No repositories found for this query.'));
+
+    return $result;
+  }
+
+  private function renderRepositories($repositories, $viewer, $handles, $list){
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
@@ -181,6 +281,7 @@ final class PhabricatorRepositorySearchEngine
       $item->setOwner($repository->getEditPolicy());
       $content = $this->buildTagsView($repository);
 
+      /*
       $commit = $repository->getMostRecentCommit();
       if ($commit) {
         $commit_link = phutil_tag(
@@ -196,6 +297,7 @@ final class PhabricatorRepositorySearchEngine
         $item->setSubhead($commit_link);
         $item->setEpoch($commit->getEpoch());
       }
+      */
 
       $item->addIcon(
         'none',
@@ -297,12 +399,6 @@ final class PhabricatorRepositorySearchEngine
         ->setFooter(array($content));
       $list->addItem($view);
     }
-
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setObjectList($list);
-    $result->setNoDataString(pht('No repositories found for this query.'));
-
-    return $result;
   }
 
   protected function willUseSavedQuery(PhabricatorSavedQuery $saved) {

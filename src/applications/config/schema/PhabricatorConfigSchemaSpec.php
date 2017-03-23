@@ -235,6 +235,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       // be nice to eventually reduce this to a small set of standard lengths.
 
       static $valid_types = array(
+        'text256' => true,
         'text255' => true,
         'text160' => true,
         'text128' => true,
