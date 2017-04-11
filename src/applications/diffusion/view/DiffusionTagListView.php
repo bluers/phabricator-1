@@ -157,4 +157,77 @@ final class DiffusionTagListView extends DiffusionView {
     return $table->render();
   }
 
+  public function renderJSON() {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+    $viewer = $this->getViewer();
+
+    $download_keys = array();
+    foreach ($this->tags as $tag){
+      $download_keys[] = $repository->getPHID()."_".$tag->getName();
+    }
+
+    $downloads = id(new DiffusionCommitDownloadsQuery())->withKeys($download_keys)->setViewer($viewer)->execute();
+    $download_infos = array();
+    foreach ($downloads as $download){
+      $download_infos[$download->getKey()] = $download;
+    }
+
+    $rows = array();
+    foreach ($this->tags as $tag) {
+      $commit = idx($this->commits, $tag->getCommitIdentifier());
+
+      $tag_link =  $drequest->generateURI(
+            array(
+              'action' => 'browse',
+              'commit' => $tag->getName(),
+            ))->getPath();
+
+      $tag_name = $tag->getName();
+
+      $author = null;
+      if ($commit && $commit->getAuthorPHID()) {
+        $author = $this->handles[$commit->getAuthorPHID()]->getAuthorName();
+      } else if ($commit && $commit->getCommitData()) {
+        $author = $commit->getCommitData()->getAuthorName();
+      } else {
+        $author = $tag->getAuthor();
+      }
+
+      $description = null;
+      if ($tag->getType() == 'git/tag') {
+        // In Git, a tag may be a "real" tag, or just a reference to a commit.
+        // If it's a real tag, use the message on the tag, since this may be
+        // unique data which isn't otherwise available.
+        $description = $tag->getDescription();
+      } else {
+        if ($commit) {
+          $description = $commit->getSummary();
+        } else {
+          $description = $tag->getDescription();
+        }
+      }
+
+
+      $download_key = $repository->getPHID()."_".$tag->getName();
+      $download = idx($download_infos, $download_key);
+      $download_count = "0";
+      if($download){
+        $download_count = $download->getCount();
+      }
+
+      $rows[] = array(
+        "tag_link"=>$tag_link,
+        "tag_name"=>$tag_name,
+        "author"=>$author,
+        "description"=>$description,
+        "timestamp"=>$tag->getEpoch(),
+        "download_count"=>$download_count
+      );
+    }
+
+
+    return $rows;
+  }
+
 }

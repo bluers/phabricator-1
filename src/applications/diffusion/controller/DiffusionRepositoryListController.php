@@ -19,7 +19,7 @@ final class DiffusionRepositoryListController extends DiffusionController {
 
     return id(new PhabricatorRepositorySearchEngine())
       ->setController($this)
-      ->setNavigationItems($items)
+      //->setNavigationItems($items)
       ->buildResponse();
   }
 
