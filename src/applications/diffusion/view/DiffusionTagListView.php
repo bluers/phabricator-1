@@ -211,9 +211,9 @@ final class DiffusionTagListView extends DiffusionView {
 
       $download_key = $repository->getPHID()."_".$tag->getName();
       $download = idx($download_infos, $download_key);
-      $download_count = "0";
+      $download_count = 0;
       if($download){
-        $download_count = $download->getCount();
+        $download_count = intval($download->getCount());
       }
 
       $rows[] = array(

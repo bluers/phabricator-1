@@ -564,8 +564,17 @@ final class PhabricatorRepositoryAjaxSearchEngine
       $item["uris"] = $this->renderCloneURIsJSON($repository);
 
       $versions = $this->buildTagsJSON($repository);
+      $item["download_count"] = 0;
       $item["versions"] = $versions;
+      foreach ($versions as $version){
+        $download_count = $version["download_count"];
+        if(isset($download_count) && $download_count != null){
+          $item["download_count"] += intval($download_count);
+        }
+      }
 
+      $description_html = $this->buildDescriptionJSON($repository);
+      $item["description"] = $description_html;
 /*
       $property_table = $this->buildPropertiesTable($repository);
       $item->setCloneURL($property_table);
@@ -913,6 +922,20 @@ final class PhabricatorRepositoryAjaxSearchEngine
     return null;
   }
 
+  private function buildDescriptionJSON(PhabricatorRepository $repository) {
+    $viewer = $this->requireViewer();
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $description = $repository->getDetail('description');
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($viewer, $description);
+      $view->addTextContent($description);
+      return $view->render()->getHTMLContent();
+    }
+    return null;
+  }
+
   private function renderCloneURIsJSON(PhabricatorRepository $repository){
 
     $cloneURIs = array();
@@ -1167,6 +1190,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
     $viewer = $this->requireViewer();
 
     $groupby_key = "";
+    $categories_as_tree = false;
 
     $query_key = $request->getValue('queryKey');
     if (!strlen($query_key)) {
@@ -1215,6 +1239,11 @@ final class PhabricatorRepositoryAjaxSearchEngine
         else{
           $groupby_key = "";
         }
+        continue;
+      }
+
+      if($key == "tree"){
+        $categories_as_tree = $constraint == "true" || $constraint == "True" || $constraint == "1";
         continue;
       }
 
@@ -1389,15 +1418,92 @@ final class PhabricatorRepositoryAjaxSearchEngine
       if($groupby_key == ""){
 
           $items = $this->renderRepositoriesJSON($repositories, $viewer, $handles);
-          $data = array("subtotal" => count($items), "items" => $items);
+          $download_count = 0;
+          foreach ($items as $item){
+            $download_count_repo = $item["download_count"];
+            if(isset($download_count) && $download_count != null){
+              $download_count += $download_count_repo;
+            }
+          }
+          $data = array("subtotal" => count($items), "download_count" => $download_count, "items" => $items);
 
       }
       else{
-        foreach ($repositories_groupby as $key => $repositores_group){
+        if($categories_as_tree){
 
-          $items = $this->renderRepositoriesJSON($repositores_group, $viewer, $handles);
-          $data[$key] = array("subtotal" => count($repositores_group), "items" => $items);
+          $subtree_key = $groupby_key == "organization"?"categories":"organizations";
+          $subtree = array();
+          foreach ($repositories_groupby as $key => $repositores_group){
 
+            $subtree_item = array();
+            $items = $this->renderRepositoriesJSON($repositores_group, $viewer, $handles);
+            foreach ($items as $item){
+              $subcats = $item[$subtree_key];
+              if(count($subcats) == 0){
+                $cat_name = "";
+                $cat_items = $subtree_item[$cat_name];
+                if(isset($cat_items)){
+                  $cat_items[] = $item;
+                  $subtree_item[$cat_name] = $cat_items;
+                }
+                else{
+                  $cat_items = array($item);
+                  $subtree_item[$cat_name] = $cat_items;
+                }
+
+              }
+              else{
+                foreach ($subcats as $subcat){
+                  $cat_name = $subcat["name"];
+                  $cat_items = $subtree_item[$cat_name];
+                  if(isset($cat_items)){
+                    $cat_items[] = $item;
+                    $subtree_item[$cat_name] = $cat_items;
+                  }
+                  else{
+                    $cat_items = array($item);
+                    $subtree_item[$cat_name] = $cat_items;
+                  }
+                }
+              }
+
+            }
+
+
+            foreach ($subtree_item as $cat_name => $repos){
+              $download_count_cat = 0;
+              //calculate download count of subcat
+              foreach ($repos as $repo_dict){
+                $download_count = $repo_dict["download_count"];
+                if(isset($download_count) && $download_count != null){
+                  $download_count_cat += $download_count;
+                }
+              }
+              $subtree[$cat_name] = array("items" => $repos,
+                "download_count" => $download_count_cat,
+                "subtotal" => count($repos));
+
+            }
+            //$subtree[] = array("items" => $subtree_item, "download_count" => $download_count_cat, "subtotal" => count($subtree_item));
+
+            $data[$key] = array("subtotal" => count($repositores_group), "subcats" => $subtree);
+
+          }
+        }
+        else{
+          foreach ($repositories_groupby as $key => $repositores_group){
+
+            $items = $this->renderRepositoriesJSON($repositores_group, $viewer, $handles);
+            $download_count = 0;
+            foreach ($items as $item){
+              $download_count_repo = $item["download_count"];
+              if(isset($download_count) && $download_count != null){
+                $download_count += $download_count_repo;
+              }
+            }
+            $data[$key] = array("subtotal" => count($repositores_group), "download_count" => $download_count, "items" => $items);
+
+          }
         }
       }
 
