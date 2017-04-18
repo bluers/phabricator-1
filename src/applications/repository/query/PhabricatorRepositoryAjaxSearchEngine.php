@@ -410,6 +410,9 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
       $item = array("name" => $repository->getName(), "status" => $repository->getStatus(), "id" => $id,
         "phid" => $repository->getPHID(), "dateCreated" => $dateCreated = date('Y-m-d', $repository->getDateCreated()));
+      if($repository->getMostRecentCommit()){
+        $item["lastModifiedTimestamp"] = intval($repository->getMostRecentCommit()->getEpoch());
+      }
 
       $owner = $repository->getEditPolicy();
       if($owner && $owner != 'admin'){
