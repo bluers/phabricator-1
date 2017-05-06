@@ -140,8 +140,6 @@ final class DifferentialTransactionEditor
             return ($object->getStatus() == $status_closed);
           case DifferentialAction::ACTION_RETHINK:
             return ($object->getStatus() != $status_plan);
-          case DifferentialAction::ACTION_REQUEST:
-            return ($object->getStatus() != $status_review);
           case DifferentialAction::ACTION_CLAIM:
             return ($actor_phid != $object->getAuthorPHID());
         }
@@ -198,9 +196,6 @@ final class DifferentialTransactionEditor
             $object->setStatus($status_review);
             return;
           case DifferentialAction::ACTION_REOPEN:
-            $object->setStatus($status_review);
-            return;
-          case DifferentialAction::ACTION_REQUEST:
             $object->setStatus($status_review);
             return;
           case DifferentialAction::ACTION_CLOSE:
@@ -294,19 +289,6 @@ final class DifferentialTransactionEditor
             $downgrade_accepts = true;
           }
           break;
-
-        // TODO: Remove this, obsoleted by ModularTransactions above.
-        case DifferentialTransaction::TYPE_ACTION:
-          switch ($xaction->getNewValue()) {
-            case DifferentialAction::ACTION_REQUEST:
-              $downgrade_rejects = true;
-              if ((!$is_sticky_accept) ||
-                  ($object->getStatus() != $status_plan)) {
-                $downgrade_accepts = true;
-              }
-              break;
-          }
-          break;
       }
     }
 
@@ -355,6 +337,24 @@ final class DifferentialTransactionEditor
           ->setIgnoreOnNoEffect(true)
           ->setNewValue(array('+' => $edits));
       }
+    }
+
+    $downgrade = array();
+    if ($downgrade_accepts) {
+      $downgrade[] = DifferentialReviewerStatus::STATUS_ACCEPTED;
+    }
+
+    if ($downgrade_rejects) {
+      $downgrade[] = DifferentialReviewerStatus::STATUS_REJECTED;
+    }
+
+    if ($downgrade) {
+      $void_type = DifferentialRevisionVoidTransaction::TRANSACTIONTYPE;
+
+      $results[] = id(new DifferentialTransaction())
+        ->setTransactionType($void_type)
+        ->setIgnoreOnNoEffect(true)
+        ->setNewValue($downgrade);
     }
 
     $is_commandeer = false;
@@ -669,12 +669,11 @@ final class DifferentialTransactionEditor
           $reviewer_status = $reviewer->getReviewerStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:
-              $action_phid = $reviewer->getLastActionDiffPHID();
               $active_phid = $active_diff->getPHID();
-              $is_current = ($action_phid == $active_phid);
-
-              if ($is_current) {
+              if ($reviewer->isRejected($active_phid)) {
                 $has_rejecting_reviewer = true;
+              } else {
+                $has_rejecting_older_reviewer = true;
               }
               break;
             case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
@@ -685,11 +684,8 @@ final class DifferentialTransactionEditor
               break;
             case DifferentialReviewerStatus::STATUS_ACCEPTED:
               if ($reviewer->isUser()) {
-                $action_phid = $reviewer->getLastActionDiffPHID();
                 $active_phid = $active_diff->getPHID();
-                $is_current = ($action_phid == $active_phid);
-
-                if ($is_sticky_accept || $is_current) {
+                if ($reviewer->isAccepted($active_phid)) {
                   $has_accepting_user = true;
                 }
               }
@@ -936,41 +932,6 @@ final class DifferentialTransactionEditor
           case ArcanistDifferentialRevisionStatus::CLOSED:
             return pht(
               'You can not plan changes to this revision because it has '.
-              'already been closed.');
-          default:
-            throw new Exception(
-              pht(
-                'Encountered unexpected revision status ("%s") when '.
-                'validating "%s" action.',
-                $revision_status,
-                $action));
-        }
-        break;
-
-      case DifferentialAction::ACTION_REQUEST:
-        if (!$actor_is_author) {
-          return pht(
-            'You can not request review of this revision because you do '.
-            'not own it. To request review of a revision, you must be its '.
-            'owner.');
-        }
-
-        switch ($revision_status) {
-          case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-          case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
-            // These are OK.
-            break;
-          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-            // This will be caught as "no effect" later on.
-            break;
-          case ArcanistDifferentialRevisionStatus::ABANDONED:
-            return pht(
-              'You can not request review of this revision because it has '.
-              'been abandoned. Instead, reclaim it.');
-          case ArcanistDifferentialRevisionStatus::CLOSED:
-            return pht(
-              'You can not request review of this revision because it has '.
               'already been closed.');
           default:
             throw new Exception(
@@ -1230,12 +1191,23 @@ final class DifferentialTransactionEditor
     array $changes,
     PhutilMarkupEngine $engine) {
 
-    $flat_blocks = mpull($changes, 'getNewValue');
-    $huge_block = implode("\n\n", $flat_blocks);
-
+    // For "Fixes ..." and "Depends on ...", we're only going to look at
+    // content blocks which are part of the revision itself (like "Summary"
+    // and  "Test Plan"), not comments.
+    $content_parts = array();
+    foreach ($changes as $change) {
+      if ($change->getTransaction()->isCommentTransaction()) {
+        continue;
+      }
+      $content_parts[] = $change->getNewValue();
+    }
+    if (!$content_parts) {
+      return array();
+    }
+    $content_block = implode("\n\n", $content_parts);
     $task_map = array();
     $task_refs = id(new ManiphestCustomFieldStatusParser())
-      ->parseCorpus($huge_block);
+      ->parseCorpus($content_block);
     foreach ($task_refs as $match) {
       foreach ($match['monograms'] as $monogram) {
         $task_id = (int)trim($monogram, 'tT');
@@ -1245,7 +1217,7 @@ final class DifferentialTransactionEditor
 
     $rev_map = array();
     $rev_refs = id(new DifferentialCustomFieldDependsOnParser())
-      ->parseCorpus($huge_block);
+      ->parseCorpus($content_block);
     foreach ($rev_refs as $match) {
       foreach ($match['monograms'] as $monogram) {
         $rev_id = (int)trim($monogram, 'dD');
@@ -1907,7 +1879,5 @@ final class DifferentialTransactionEditor
       $object->getPHID(),
       $acting_phid);
   }
-
-
 
 }
