@@ -159,7 +159,7 @@ final class PhabricatorConduitAPIController
     $request = $this->getRequest();
 
     if ($request->getUser()->getPHID()) {
-      $request->validateCSRF();
+      //conduit 不验证CSRF//$request->validateCSRF();
       return $this->validateAuthenticatedUser(
         $api_request,
         $request->getUser());
