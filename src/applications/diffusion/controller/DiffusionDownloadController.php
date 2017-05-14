@@ -17,9 +17,6 @@ final class DiffusionDownloadController extends DiffusionController {
     }
 
     $drequest = $this->getDiffusionRequest();
-
-    // Figure out if we're browsing a directory, a file, or a search result
-    // list.
     $commit = $drequest->getCommit();
     $repo = $drequest->getRepository();
     $localPath = $repo->getLocalPath();
@@ -28,16 +25,39 @@ final class DiffusionDownloadController extends DiffusionController {
 
     $tempdir_proj = sprintf("%s/%s/", $tempdir, rand());
     exec(sprintf("mkdir -p %s", $tempdir_proj));
-    $cmd = "cd $tempdir_proj && git clone $localPath $commit && cd $commit && git checkout $commit && cd .. && tar -cvzf $commit.tar.gz $commit";
-    exec($cmd);
-    $file_name = "$tempdir_proj"."$commit.tar.gz";
 
-    PhabricatorRepositoryDownloads::incrementDownloads($repo->getPHID()."_".$commit);
+    if($repo->getVersionControlSystem() == 'svn'){
+      $commit = $drequest->getPath();
 
-    return id(new AphrontFileResponse())
-      ->setDownload("$name-$commit.tar.gz")
-      ->setMimeType('application/gzip')
-      ->setContent(file_get_contents($file_name));
+      $commitIdentifier = substr($commit,5);
+      $commitIdentifier = rtrim($commitIdentifier, '/');
+      $cmd = "cd $tempdir_proj && svn co file://$localPath$commit $commitIdentifier && tar -cvzf $commitIdentifier.tar.gz $commitIdentifier";
+      exec($cmd);
+      $file_name = "$tempdir_proj"."$commitIdentifier.tar.gz";
+
+      PhabricatorRepositoryDownloads::incrementDownloads($repo->getPHID()."_".$commitIdentifier);
+
+      return id(new AphrontFileResponse())
+        ->setDownload("$name-$commitIdentifier.tar.gz")
+        ->setMimeType('application/gzip')
+        ->setContent(file_get_contents($file_name));
+    }
+    else{
+      // Figure out if we're browsing a directory, a file, or a search result
+      // list.
+
+      $cmd = "cd $tempdir_proj && git clone $localPath $commit && cd $commit && git checkout $commit && cd .. && tar -cvzf $commit.tar.gz $commit";
+      exec($cmd);
+      $file_name = "$tempdir_proj"."$commit.tar.gz";
+
+      PhabricatorRepositoryDownloads::incrementDownloads($repo->getPHID()."_".$commit);
+
+      return id(new AphrontFileResponse())
+        ->setDownload("$name-$commit.tar.gz")
+        ->setMimeType('application/gzip')
+        ->setContent(file_get_contents($file_name));
+    }
+
   }
 
 
@@ -1663,10 +1683,30 @@ final class DiffusionDownloadController extends DiffusionController {
         ->setHref($history_uri)
         ->setIcon('fa-list'));
 
+    $download_uri = $drequest->generateURI(
+      array(
+        'action' => 'download',
+      ));
+
+    $isSvn = $repository->getVersionControlSystem == 'svn';
+
+    $commitIdentifier = $drequest->getSymbolicCommit();
+    if($isSvn){
+      $commitIdentifier = $drequest->getPath();
+      $commitIdentifier = substr($commitIdentifier,5);
+      $commitIdentifier = rtrim($commitIdentifier, '/');
+    }
+
+    $key = $repository->getPHID()."_".$commitIdentifier;
+    $download_count = PhabricatorRepositoryDownloads::getDownloads($key);
+    if($download_count > 9999){
+      $download_count = "9999+";
+    }
+
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Download %s %s zip release', $repository->getName(), $drequest->getSymbolicCommit()))
-        ->setHref($history_uri)
+        ->setName(pht('Download %s %s zip release', "", $commitIdentifier)."(".$download_count.")")
+        ->setHref($download_uri)
         ->setIcon('fa-download'));
 
     $behind_head = $drequest->getSymbolicCommit();

@@ -1678,17 +1678,31 @@ final class DiffusionBrowseController extends DiffusionController {
         'action' => 'download',
       ));
 
-    $key = $repository->getPHID()."_".$drequest->getSymbolicCommit();
-    $download_count = PhabricatorRepositoryDownloads::getDownloads($key);
-    if($download_count > 9999){
-      $download_count = "9999+";
+    $isSvn = $repository->getVersionControlSystem() == 'svn';
+    $commitIdentifier = $drequest->getSymbolicCommit();
+    if($isSvn){
+      $commitIdentifier = $drequest->getPath();
+      $commitIdentifier = substr($commitIdentifier,5);
+      $commitIdentifier = rtrim($commitIdentifier, '/');
+      if(strpos($commitIdentifier, '/') > 0){
+        $commitIdentifier = null;
+      }
     }
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Download %s %s zip release', "", $drequest->getSymbolicCommit())."(".$download_count.")")
-        ->setHref($download_uri)
-        ->setIcon('fa-download'));
+    if($commitIdentifier != null){
+      $key = $repository->getPHID()."_".$commitIdentifier;
+      $download_count = PhabricatorRepositoryDownloads::getDownloads($key);
+      if($download_count > 9999){
+        $download_count = "9999+";
+      }
+
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Download %s %s zip release', "", $commitIdentifier)."(".$download_count.")")
+          ->setHref($download_uri)
+          ->setIcon('fa-download'));
+    }
 
     $behind_head = $drequest->getSymbolicCommit();
 
