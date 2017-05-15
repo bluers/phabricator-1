@@ -2,8 +2,14 @@
 
 final class DiffusionBrowseTableView extends DiffusionView {
 
+  private $basePath;
   private $paths;
   private $handles = array();
+
+  public function setBasePath($p){
+    $this->basePath = $p;
+    return $this;
+  }
 
   public function setPaths(array $paths) {
     assert_instances_of($paths, 'DiffusionRepositoryPath');
@@ -21,10 +27,16 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $request = $this->getDiffusionRequest();
     $repository = $request->getRepository();
 
-    $base_path = trim($request->getPath(), '/');
-    if ($base_path) {
-      $base_path = $base_path.'/';
+    if(isset($this->basePath) && !($this->basePath==null)){
+      $base_path = $this->basePath;
     }
+    else{
+      $base_path = trim($request->getPath(), '/');
+      if ($base_path) {
+        $base_path = $base_path.'/';
+      }
+    }
+
 
     $need_pull = array();
     $rows = array();

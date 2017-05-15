@@ -578,6 +578,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
       $description_html = $this->buildDescriptionJSON($repository);
       $item["description"] = $description_html;
+      $item['uri'] = $repository->getURI();
 /*
       $property_table = $this->buildPropertiesTable($repository);
       $item->setCloneURL($property_table);

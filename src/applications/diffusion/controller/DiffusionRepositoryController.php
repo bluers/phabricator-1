@@ -764,7 +764,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_table = id(new DiffusionBrowseTableView())
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
-      ->setHandles($handles);
+      ->setHandles($handles)
+      ->setBasePath("/docs/");
     if ($browse_paths) {
       $browse_table->setPaths($browse_paths);
     } else {
