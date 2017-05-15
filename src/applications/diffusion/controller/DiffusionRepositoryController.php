@@ -4,6 +4,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
   private $historyFuture;
   private $browseFuture;
+  private $browseDocFuture;
   private $tagFuture;
   private $branchFuture;
 
@@ -134,6 +135,14 @@ final class DiffusionRepositoryController extends DiffusionController {
         'limit' => $browse_pager->getPageSize() + 1,
       ));
 
+    $this->browseDocFuture = $this->callConduitMethod(
+      'diffusion.browsequery',
+      array(
+        'commit' => $commit,
+        'path' => 'docs',
+        'limit' => $browse_pager->getPageSize() + 1,
+      ));
+
     if ($this->needTagFuture()) {
       $tag_limit = $this->getTagLimit();
       $this->tagFuture = $this->callConduitMethod(
@@ -160,6 +169,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $this->browseFuture,
       $this->tagFuture,
       $this->branchFuture,
+      $this->browseDocFuture,
     );
     $futures = array_filter($futures);
     $futures = new FutureIterator($futures);
@@ -220,6 +230,33 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browse_exception = $ex;
     }
 
+    try {
+      $browsedoc_results = $this->browseDocFuture->resolve();
+      $browsedoc_results = DiffusionBrowseResultSet::newFromConduit(
+        $browsedoc_results);
+
+      $browsedoc_paths = $browsedoc_results->getPaths();
+      $browsedoc_paths = $browse_pager->sliceResults($browsedoc_paths);
+
+      foreach ($browsedoc_paths as $item) {
+        $data = $item->getLastCommitData();
+        if ($data) {
+          if ($data->getCommitDetail('authorPHID')) {
+            $phids[$data->getCommitDetail('authorPHID')] = true;
+          }
+          if ($data->getCommitDetail('committerPHID')) {
+            $phids[$data->getCommitDetail('committerPHID')] = true;
+          }
+        }
+      }
+
+      $browsedoc_exception = null;
+    } catch (Exception $ex) {
+      $browsedoc_paths = null;
+      $browsedoc_paths = null;
+      $browsedoc_exception = $ex;
+    }
+
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
 
@@ -228,6 +265,13 @@ final class DiffusionRepositoryController extends DiffusionController {
     } else {
       $readme = null;
     }
+
+    $content[] = $this->buildBrowseDocTable(
+      $browsedoc_results,
+      $browsedoc_paths,
+      $browsedoc_exception,
+      $handles,
+      $browse_pager);
 
     $content[] = $this->buildBrowseTable(
       $browse_results,
@@ -669,6 +713,70 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     $header = id(new PHUIHeaderView())
       ->setHeader($repository->getName());
+
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-folder-open');
+
+    $button = new PHUIButtonView();
+    $button->setText(pht('Browse Repository'));
+    $button->setTag('a');
+    $button->setIcon($icon);
+    $button->setHref($browse_uri);
+
+    $header->addActionLink($button);
+    $browse_panel->setHeader($header);
+    $browse_panel->setTable($browse_table);
+
+    $pager->setURI($browse_uri, 'offset');
+
+    if ($pager->willShowPagingControls()) {
+      $browse_panel->setPager($pager);
+    }
+
+    return $browse_panel;
+  }
+
+  private function buildBrowseDocTable(
+    $browse_results,
+    $browse_paths,
+    $browse_exception,
+    array $handles,
+    PHUIPagerView $pager) {
+
+    require_celerity_resource('diffusion-icons-css');
+
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    if ($browse_exception) {
+      if ($repository->isImporting()) {
+        // The history table renders a useful message.
+        return null;
+      } else {
+        return $this->renderStatusMessage(
+          pht('Unable to Retrieve Paths'),
+          $browse_exception->getMessage());
+      }
+    }
+
+    $browse_table = id(new DiffusionBrowseTableView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setHandles($handles);
+    if ($browse_paths) {
+      $browse_table->setPaths($browse_paths);
+    } else {
+      $browse_table->setPaths(array());
+    }
+
+    $browse_uri = $drequest->generateURI(array('action' => 'browse'));
+
+    $browse_panel = id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('All Documents'));
 
     $icon = id(new PHUIIconView())
       ->setIcon('fa-folder-open');
