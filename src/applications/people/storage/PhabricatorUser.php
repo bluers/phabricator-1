@@ -903,10 +903,10 @@ final class PhabricatorUser
 
     if ($when->format('Y') !== $now->format('Y')) {
       // Different year, so show "Feb 31 2075".
-      $format = 'M j Y';
+      $format = 'Y年n月j日';
     } else if ($when->format('Ymd') !== $now->format('Ymd')) {
       // Same year but different month and day, so show "Feb 31".
-      $format = 'M j';
+      $format = 'n月j日';
     } else {
       // Same year, month and day so show a time of day.
       $pref_time = PhabricatorTimeFormatSetting::SETTINGKEY;
