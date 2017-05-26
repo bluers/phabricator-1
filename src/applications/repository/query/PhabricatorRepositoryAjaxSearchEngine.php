@@ -982,7 +982,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // No tags in SVN.
-        return false;
+        return true;
     }
 
     return true;
