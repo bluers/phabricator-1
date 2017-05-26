@@ -191,11 +191,20 @@ final class DiffusionTagListView extends DiffusionView {
     foreach ($this->tags as $tag) {
       $commit = idx($this->commits, $tag->getCommitIdentifier());
 
-      $tag_link =  $drequest->generateURI(
-            array(
-              'action' => 'browse',
-              'commit' => $tag->getName(),
-            ))->getPath();
+      if($tag->getType() == 'svn/tag'){
+        $tag_link = $drequest->generateURI(
+              array(
+                'action' => 'browse',
+                'path' => $tag->getCommitIdentifier(),
+              ))->getPath();
+      }
+      else{
+        $tag_link = $drequest->generateURI(
+              array(
+                'action' => 'browse',
+                'commit' => $tag->getName(),
+              ))->getPath();
+      }
 
       $tag_name = $tag->getName();
 
