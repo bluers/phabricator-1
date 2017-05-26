@@ -167,4 +167,54 @@ final class DiffusionBrowseTableView extends DiffusionView {
     return $view->render();
   }
 
+  public function renderJSON() {
+    $request = $this->getDiffusionRequest();
+    $repository = $request->getRepository();
+
+    if(isset($this->basePath) && !($this->basePath==null)){
+      $base_path = $this->basePath;
+    }
+    else{
+      $base_path = trim($request->getPath(), '/');
+      if ($base_path) {
+        $base_path = $base_path.'/';
+      }
+    }
+
+
+    $need_pull = array();
+    $rows = array();
+    $show_edit = false;
+    foreach ($this->paths as $path) {
+      $full_path = $base_path.$path->getPath();
+
+      $dir_slash = null;
+      $file_type = $path->getFileType();
+      if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+        continue;
+      } else if ($file_type == DifferentialChangeType::FILE_SUBMODULE) {
+         continue;
+      } else {
+        $browse_text = $path->getPath();
+      }
+
+      $href = $request->generateURI(array(
+        'action' => 'browse',
+        'path' => $full_path,
+      ));
+
+      $rows[] = array(
+        "fullpath" => $full_path,
+        "name" => $browse_text,
+        "uri" => $href->getPath(),
+      );
+
+      $dir_slash = null;
+    }
+
+
+
+    return $rows;
+  }
+
 }

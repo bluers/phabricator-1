@@ -566,6 +566,9 @@ final class PhabricatorRepositoryAjaxSearchEngine
       $item["languages"] = join($symbol_languages, ",");
       $item["uris"] = $this->renderCloneURIsJSON($repository);
 
+      $docs = $this->buildDocsJSON($repository);
+      $item["docs"] = $docs;
+
       $versions = $this->buildTagsJSON($repository);
       $item["download_count"] = 0;
       $item["versions"] = $versions;
@@ -831,6 +834,79 @@ final class PhabricatorRepositoryAjaxSearchEngine
       $authors[] = $history_item["commitData"]["authorName"];
     }
     return join(array_map('self::renderName', array_unique($authors)), ", ");
+  }
+
+  private function buildDocsJSON($repository){
+
+    $docs = array();
+
+    $viewer = $this->requireViewer();
+    $params = array(
+      'repository' => $repository->getID(),
+      'user' => $viewer,
+      'blob' => null,
+      'commit' => null,
+      'path' => null,
+      'line' => null,
+      'branch' => null,
+      'lint' => null,
+    );
+
+    $drequest = DiffusionRequest::newFromDictionary($params);
+    $user = $viewer;
+    $method = 'diffusion.browsequery';
+
+    if($repository->getMostRecentCommit() == null){
+      return $docs;
+    }
+
+    try {
+      $browseDocFuture = DiffusionQuery::callConduitWithDiffusionRequest(
+        $user,
+        $drequest,
+        $method,
+        array(
+          'commit' => $repository->getMostRecentCommit()->getCommitIdentifier(),
+          'path' => 'docs',
+          'limit' => 1000 + 1,
+        ), true);
+
+      $browsedoc_results = $browseDocFuture->resolve();
+      $browsedoc_results = DiffusionBrowseResultSet::newFromConduit(
+        $browsedoc_results);
+
+      $browsedoc_paths = $browsedoc_results->getPaths();
+
+      foreach ($browsedoc_paths as $item) {
+        $data = $item->getLastCommitData();
+        if ($data) {
+          if ($data->getCommitDetail('authorPHID')) {
+            $phids[$data->getCommitDetail('authorPHID')] = true;
+          }
+          if ($data->getCommitDetail('committerPHID')) {
+            $phids[$data->getCommitDetail('committerPHID')] = true;
+          }
+        }
+      }
+
+      $browsedoc_exception = null;
+    } catch (Exception $ex) {
+      $browsedoc_paths = null;
+      $browsedoc_exception = $ex;
+    }
+
+    $browse_table = id(new DiffusionBrowseTableView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setBasePath("/docs/");
+    if ($browsedoc_paths) {
+      $browse_table->setPaths($browsedoc_paths);
+    } else {
+      $browse_table->setPaths(array());
+    }
+
+    $docs = $browse_table->renderJSON();
+    return $docs;
   }
 
   private function buildTagsJSON($repository){
