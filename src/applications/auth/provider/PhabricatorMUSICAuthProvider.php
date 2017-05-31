@@ -24,7 +24,7 @@ final class PhutilMUSICAuthAdapter extends PhutilAuthAdapter{
   public function authWithMUSIC(){
     $authUrl = "$this->hostname"."?webUserId=".$this->loginUsername."&pwd=".$this->loginPassword."";
     $authResultRaw = file_get_contents($authUrl);
-    $authResult = json_decode($authResultRaw);
+    $authResult = json_decode($authResultRaw, true);
     $returnCode = $authResult["returnCode"];
     if($returnCode == "0"){
       $ds = $authResult["DS"][0];
@@ -32,6 +32,9 @@ final class PhutilMUSICAuthAdapter extends PhutilAuthAdapter{
       $this->webUserId = $ds["WEB_USER_ID"];
       $this->webUserName = $ds["WEB_USER_ID"];
       $this->verifyStatus = $ds["VERIFY_STATUS"];
+    }
+    else{
+      throw new PhutilAuthCredentialException();
     }
   }
 
@@ -60,7 +63,7 @@ final class PhutilMUSICAuthAdapter extends PhutilAuthAdapter{
     return $this;
   }
 
-  public function setLoginPassword(PhutilOpaqueEnvelope $login_password) {
+  public function setLoginPassword($login_password) {
     $this->loginPassword = $login_password;
     return $this;
   }

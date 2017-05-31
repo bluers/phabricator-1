@@ -23,7 +23,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
   public function getAdapter() {
     if (!$this->adapter) {
       $conf = $this->getProviderConfig();
-
+/*
       $realname_attributes = $conf->getProperty(self::KEY_REALNAME_ATTRIBUTES);
       if (!is_array($realname_attributes)) {
         $realname_attributes = array();
@@ -58,6 +58,13 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
             $conf->getProperty(self::KEY_ANONYMOUS_PASSWORD)))
         ->setActiveDirectoryDomain(
           $conf->getProperty(self::KEY_ACTIVEDIRECTORY_DOMAIN));
+      $this->adapter = $adapter;
+*/
+      $conf = $this->getProviderConfig();
+
+      $adapter = id(new PhutilMUSICAuthAdapter())
+        ->setHostname(
+          $conf->getProperty(self::KEY_HOSTNAME));
       $this->adapter = $adapter;
     }
     return $this->adapter;
@@ -142,7 +149,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
     $username = $request->getStr('ldap_username');
     $password = $request->getStr('ldap_password');
     $has_password = strlen($password);
-    $password = new PhutilOpaqueEnvelope($password);
+    //$password = new PhutilOpaqueEnvelope($password);
 
     if (!strlen($username) || !$has_password) {
       $response = $controller->buildProviderPageResponse(
@@ -162,6 +169,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
           // passwords to the error log. See note in PhutilLDAPAuthAdapter.
           // See T3351.
 
+          $adapter->authWithMUSIC();
           DarkConsoleErrorLogPluginAPI::enableDiscardMode();
             $account_id = $adapter->getAccountID();
           DarkConsoleErrorLogPluginAPI::disableDiscardMode();
@@ -481,7 +489,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
     $providers = self::getAllEnabledProviders();
 
     foreach ($providers as $provider) {
-      if ($provider instanceof PhabricatorLDAPAuthProvider) {
+      if ($provider instanceof PhabricatorMUSICAuthProvider) {
         return $provider;
       }
     }
