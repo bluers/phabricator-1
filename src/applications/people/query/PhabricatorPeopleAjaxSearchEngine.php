@@ -352,7 +352,7 @@ final class PhabricatorPeopleAjaxSearchEngine
       }
     }
 
-    $valid_constraints = array();
+    $valid_constraints = array("projectPHIDs" => true, "projectIDs" => true);
     foreach ($fields as $field) {
       foreach ($field->getValidConstraintKeys() as $key) {
         $valid_constraints[$key] = true;
@@ -386,6 +386,49 @@ final class PhabricatorPeopleAjaxSearchEngine
     // it today. If we do identify a use case, we could save the query here.
 
     $query = $this->buildQueryFromSavedQuery($saved_query);
+
+    $projectIds = null;
+    $projectPHIDs = null;
+    if(isset($constraints["projectPHIDs"]) && $constraints["projectPHIDs"] != null){
+      $projectPHIDs = $constraints["projectPHIDs"];
+    }
+    else if(isset($constraints["projectIDs"]) && $constraints["projectIDs"] != null){
+      $projectIds = $constraints["projectIDs"];
+    }
+
+
+    if($projectPHIDs || $projectIds){
+      $projectQuery = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->needMembers(true)
+        ->needWatchers(true)
+        ->needImages(true)
+        ->needSlugs(true);
+
+      if($projectPHIDs)$projectQuery->withPHIDs($projectPHIDs);
+      if($projectIds)$projectQuery->withIDs($projectIds);
+
+
+      $policy_exception = null;
+      try {
+        $projects = $projectQuery->execute();
+      } catch (PhabricatorPolicyException $ex) {
+        $projects = null;
+      }
+      $memberPHIDs = array();
+      if($projects){
+        foreach ($projects as $project){
+          foreach($project->getMemberPHIDs() as $memberPHID){
+            $memberPHIDs[] = $memberPHID;
+          }
+        }
+      }
+    }
+
+    if(isset($memberPHIDs) && count($memberPHIDs) > 0){
+      $query->withPHIDs($memberPHIDs);
+    }
+
     $pager = $this->newPagerForSavedQuery($saved_query);
 
     $attachments = $this->getConduitSearchAttachments();
