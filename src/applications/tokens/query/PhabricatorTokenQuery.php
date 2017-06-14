@@ -27,14 +27,15 @@ final class PhabricatorTokenQuery
 
   private function getBuiltinTokens() {
     $specs = array(
-      array('like-1', pht('Like')),//5
-      array('like-2', pht('Dislike')),//1
-      array('heart-1', pht('Love')),//5
+      //array('like-1', pht('Like')),//5
+      //array('like-2', pht('Dislike')),//1
+      //array('heart-1', pht('Love')),//5
+      //array('medal-4', pht('Manufacturing Defect?')),//0
       array('heart-2', pht('Heartbreak')),//1
       array('medal-1', pht('Orange Medal')),//2
       array('medal-2', pht('Grey Medal')),//3
       array('medal-3', pht('Yellow Medal')),//4
-      array('medal-4', pht('Manufacturing Defect?')),//0
+      array('heart-1', pht('Love')),//5
       /*array('coin-1', pht('Haypence')),
       array('coin-2', pht('Piece of Eight')),
       array('coin-3', pht('Doubloon')),
