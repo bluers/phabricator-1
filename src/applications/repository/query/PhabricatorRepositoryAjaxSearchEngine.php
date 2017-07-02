@@ -405,56 +405,58 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
   private function renderRepositoriesJSON($repositories, $viewer, $handles){
     $items = array();
+
+    $repo_count = count($repositories);
+
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
       $item = array("name" => $repository->getName(), "status" => $repository->getStatus(), "id" => $id,
         "phid" => $repository->getPHID(), "dateCreated" => $dateCreated = date('Y-m-d', $repository->getDateCreated()));
-      if($repository->getMostRecentCommit()){
+      if ($repository->getMostRecentCommit()) {
         $item["lastModifiedTimestamp"] = intval($repository->getMostRecentCommit()->getEpoch());
       }
 
+
       $owner = $repository->getEditPolicy();
-      if($owner && $owner != 'admin'){
+      if ($owner && $owner != 'admin') {
         $user = id(new PhabricatorUser())->loadOneWhere(
           'phid = %s',
           $owner);
 
-        if($user){
+        if ($user) {
           $owner = $user->getUserName();
-        }
-        else{
+        } else {
           $policies = id(new PhabricatorPolicyQuery())
             ->setViewer($viewer)
             ->withPHIDs(array($owner))
             ->execute();
 
-          if($policies){
+          if ($policies) {
             $policy = head($policies);
             $rule_data = $policy->getRules();
             $users = array();
             $admin_user = null;
-            foreach ($rule_data as $rule){
-              if($rule["action"] == "allow" && $rule["rule"] == "PhabricatorUsersPolicyRule"){
-                foreach ($rule["value"] as $userPHID){
+            foreach ($rule_data as $rule) {
+              if ($rule["action"] == "allow" && $rule["rule"] == "PhabricatorUsersPolicyRule") {
+                foreach ($rule["value"] as $userPHID) {
                   $actor = id(new PhabricatorUser())->loadOneWhere(
                     'phid = %s',
                     $userPHID);
 
-                  if($actor->getUserName() == "admin"){
-                    $admin_user = $actor->getUserName()."(".$actor->getRealName().")";
+                  if ($actor->getUserName() == "admin") {
+                    $admin_user = $actor->getUserName() . "(" . $actor->getRealName() . ")";
                   }
-                  $users[] = $actor->getUserName()."(".$actor->getRealName().")";
+                  $users[] = $actor->getUserName() . "(" . $actor->getRealName() . ")";
                 }
               }
             }//foreach ($rule_data as $rule)
-            if(count($users) > 0){
-              if(count($users) > 1){
+            if (count($users) > 0) {
+              if (count($users) > 1) {
                 $users = array_diff($users, [$admin_user]);
               }
               $owner = join($users, ", ");
-            }
-            else{
+            } else {
               $owner = "多人";
             }
           }
@@ -464,7 +466,8 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
       $item["owner"] = $owner;
       $item["vcs"] = $repository->getVersionControlSystem();
-      $content = $this->buildTagsView($repository);
+
+      //$content = $this->buildTagsView($repository);
 
       $size = $repository->getCommitCount();
       if ($size) {
@@ -499,7 +502,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
           $tokensScoreAverage = $tokensScoreAverage + $scores[substr($token->getPHID(), 10)];
         }
-        $tokensScoreAverage = $tokensScoreAverage*1.0/count($tokens_given);
+        $tokensScoreAverage = $tokensScoreAverage * 1.0 / count($tokens_given);
 
         $item["score"] = $tokensScoreAverage;
       }
@@ -534,27 +537,26 @@ final class PhabricatorRepositoryAjaxSearchEngine
         $type_handles = array();
         $org_handles = array();
 
-        foreach ($project_handles as $key => $value){
-          if($value->getIcon() == "fa-building"){
+        foreach ($project_handles as $key => $value) {
+          if ($value->getIcon() == "fa-building") {
             $org_handles[$key] = $value;
-          }
-          else{
+          } else {
             $type_handles[$key] = $value;
           }
         }
 
-        if(count($org_handles) > 0){
+        if (count($org_handles) > 0) {
           //TODO: $item["organizations"][] =
-          foreach ($org_handles as $phid => $object){
+          foreach ($org_handles as $phid => $object) {
             $item["organizations"][] = array("name" => $object->getName(),
               "image" => $object->getImageURI());
           }
         }
 
 
-        if(count($type_handles) > 0){
+        if (count($type_handles) > 0) {
           //TODO: $item["organizations"][] = ;
-          foreach ($type_handles as $phid => $object){
+          foreach ($type_handles as $phid => $object) {
             $item["categories"][] = array("name" => $object->getName(),
               "image" => $object->getImageURI());
           }
@@ -566,16 +568,18 @@ final class PhabricatorRepositoryAjaxSearchEngine
       $item["languages"] = join($symbol_languages, ",");
       $item["uris"] = $this->renderCloneURIsJSON($repository);
 
-      $docs = $this->buildDocsJSON($repository);
-      $item["docs"] = $docs;
+      if ($repo_count <= 1) {
+        $docs = $this->buildDocsJSON($repository);
+        $item["docs"] = $docs;
 
-      $versions = $this->buildTagsJSON($repository);
-      $item["download_count"] = 0;
-      $item["versions"] = $versions;
-      foreach ($versions as $version){
-        $download_count = $version["download_count"];
-        if(isset($download_count) && $download_count != null){
-          $item["download_count"] += intval($download_count);
+        $versions = $this->buildTagsJSON($repository);
+        $item["download_count"] = 0;
+        $item["versions"] = $versions;
+        foreach ($versions as $version) {
+          $download_count = $version["download_count"];
+          if (isset($download_count) && $download_count != null) {
+            $item["download_count"] += intval($download_count);
+          }
         }
       }
 
