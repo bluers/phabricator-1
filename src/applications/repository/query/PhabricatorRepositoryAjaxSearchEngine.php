@@ -404,6 +404,10 @@ final class PhabricatorRepositoryAjaxSearchEngine
   }
 
   private function renderRepositoriesJSON($repositories, $viewer, $handles){
+    return $this->renderRepositoriesJSONEx($repositories, $viewer, $handles, false);
+  }
+
+  private function renderRepositoriesJSONEx($repositories, $viewer, $handles, $noDocs){
     $items = array();
 
     $repo_count = count($repositories);
@@ -568,7 +572,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
       $item["languages"] = join($symbol_languages, ",");
       $item["uris"] = $this->renderCloneURIsJSON($repository);
 
-      if ($repo_count <= 1) {
+      if (!$noDocs && $repo_count <= 1) {
         $docs = $this->buildDocsJSON($repository);
         $item["docs"] = $docs;
 
@@ -1520,7 +1524,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
           foreach ($repositories_groupby as $key => $repositores_group){
 
             $subtree_item = array();
-            $items = $this->renderRepositoriesJSON($repositores_group, $viewer, $handles);
+            $items = $this->renderRepositoriesJSONEx($repositores_group, $viewer, $handles, true);
             foreach ($items as $item){
               $subcats = $item[$subtree_key];
               if(count($subcats) == 0){
@@ -1577,7 +1581,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
         else{
           foreach ($repositories_groupby as $key => $repositores_group){
 
-            $items = $this->renderRepositoriesJSON($repositores_group, $viewer, $handles);
+            $items = $this->renderRepositoriesJSONEx($repositores_group, $viewer, $handles, true);
             $download_count = 0;
             foreach ($items as $item){
               $download_count_repo = $item["download_count"];
