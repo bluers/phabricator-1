@@ -25,6 +25,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   private $namedQueries;
   private $navigationItems = array();
 
+  private $profileMenu;
+
   const CONTEXT_LIST  = 'list';
   const CONTEXT_PANEL = 'panel';
 
@@ -438,8 +440,44 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       ->setEngineClassName(get_class($this));
   }
 
+  protected function getProfileMenu()
+  {
+    if (!$this->profileMenu) {
+      $viewer = $this->requireViewer();
+      $applications = id(new PhabricatorApplicationQuery())
+        ->setViewer($viewer)
+        ->withClasses(array('PhabricatorHomeApplication'))
+        ->withInstalled(true)
+        ->execute();
+      $home = head($applications);
+      if (!$home) {
+        return null;
+      }
+
+      $engine = id(new PhabricatorHomeProfileMenuEngine())
+        ->setViewer($viewer)
+        ->setProfileObject($home)
+        ->setCustomPHID($viewer->getPHID());
+
+      $this->profileMenu = $engine->buildNavigation();
+    }
+
+    return $this->profileMenu;
+  }
+
   public function addNavigationItems(PHUIListView $menu) {
     $viewer = $this->requireViewer();
+
+    $profile_menu = $this->getProfileMenu();
+    if ($profile_menu) {
+      //$menu->setProfileMenu($profile_menu);
+      foreach($profile_menu->getMenu()->getItems() as $item){
+        $menu->addMenuItem($item);
+      }
+
+    }
+
+    return $this;
 
     $menu->newLabel(pht('Queries'));
 
@@ -460,9 +498,11 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $advanced_uri = $this->getQueryResultsPageURI('advanced');
     $menu->newLink(pht('Advanced Search'), $advanced_uri, 'query/advanced');
 
+
     foreach ($this->navigationItems as $extra_item) {
       $menu->addMenuItem($extra_item);
     }
+
 
     return $this;
   }
