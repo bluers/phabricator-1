@@ -151,11 +151,25 @@ final class PhabricatorProfileMenuItemConfiguration
   }
 
   public function getSortVector() {
-    // Sort custom items above global items.
+    // Sort custom items below global items.
     if ($this->getCustomPHID()) {
-      $is_global = 0;
-    } else {
       $is_global = 1;
+    } else {
+      $is_global = 0;
+    }
+
+    if(strcmp($this->getMenuItemKey(), "menu.manage") == 0){
+      $is_menumanage = 1;
+    }
+    else{
+      $is_menumanage = 0;
+    }
+
+    if(strcmp($this->getMenuItemKey(), "home.launcher.menu") == 0){
+      $is_menumore = 1;
+    }
+    else{
+      $is_menumore = 0;
     }
 
     // Sort items with an explicit order above items without an explicit order,
@@ -168,6 +182,8 @@ final class PhabricatorProfileMenuItemConfiguration
     }
 
     return id(new PhutilSortVector())
+      ->addInt($is_menumanage)
+      ->addInt($is_menumore)
       ->addInt($is_global)
       ->addInt($has_order)
       ->addInt((int)$order)

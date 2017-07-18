@@ -715,7 +715,12 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
       $authors[] = $author;
     }
-    return array_unique($authors);
+    $authors_unique = array_unique($authors);
+    $authors = array();
+    foreach ($authors_unique as $item => $value){
+      $authors[] = $value;
+    }
+    return $authors;
   }
 
   private function buildTagsView($repository){

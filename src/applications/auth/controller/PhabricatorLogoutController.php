@@ -47,7 +47,7 @@ final class PhabricatorLogoutController
       $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/auth/loggedout/');
+        ->setURI('/'); // 登出之后，重定向到 / 
     }
 
     if ($viewer->getPHID()) {
