@@ -428,44 +428,46 @@ final class PhabricatorRepositoryAjaxSearchEngine
           'phid = %s',
           $owner);
 
-        if ($user) {
-          $owner = $user->getUserName();
-        } else {
-          $policies = id(new PhabricatorPolicyQuery())
-            ->setViewer($viewer)
-            ->withPHIDs(array($owner))
-            ->execute();
+        if (!$noDocs && $repo_count <= 1) {
+          if ($user) {
+            $owner = $user->getUserName();
+          } else {
+            $policies = id(new PhabricatorPolicyQuery())
+              ->setViewer($viewer)
+              ->withPHIDs(array($owner))
+              ->execute();
 
-          if ($policies) {
-            $policy = head($policies);
-            $rule_data = $policy->getRules();
-            $users = array();
-            $admin_user = null;
-            foreach ($rule_data as $rule) {
-              if ($rule["action"] == "allow" && $rule["rule"] == "PhabricatorUsersPolicyRule") {
-                foreach ($rule["value"] as $userPHID) {
-                  $actor = id(new PhabricatorUser())->loadOneWhere(
-                    'phid = %s',
-                    $userPHID);
+            if ($policies) {
+              $policy = head($policies);
+              $rule_data = $policy->getRules();
+              $users = array();
+              $admin_user = null;
+              foreach ($rule_data as $rule) {
+                if ($rule["action"] == "allow" && $rule["rule"] == "PhabricatorUsersPolicyRule") {
+                  foreach ($rule["value"] as $userPHID) {
+                    $actor = id(new PhabricatorUser())->loadOneWhere(
+                      'phid = %s',
+                      $userPHID);
 
-                  if ($actor->getUserName() == "admin") {
-                    $admin_user = $actor->getUserName() . "(" . $actor->getRealName() . ")";
+                    if ($actor->getUserName() == "admin") {
+                      $admin_user = $actor->getUserName() . "(" . $actor->getRealName() . ")";
+                    }
+                    $users[] = $actor->getUserName() . "(" . $actor->getRealName() . ")";
                   }
-                  $users[] = $actor->getUserName() . "(" . $actor->getRealName() . ")";
                 }
+              }//foreach ($rule_data as $rule)
+              if (count($users) > 0) {
+                if (count($users) > 1) {
+                  $users = array_diff($users, [$admin_user]);
+                }
+                $owner = join($users, ", ");
+              } else {
+                $owner = "多人";
               }
-            }//foreach ($rule_data as $rule)
-            if (count($users) > 0) {
-              if (count($users) > 1) {
-                $users = array_diff($users, [$admin_user]);
-              }
-              $owner = join($users, ", ");
-            } else {
-              $owner = "多人";
             }
-          }
 
-        }
+          }//
+        }//if (!$noDocs && $repo_count <= 1)
       }
 
       $item["owner"] = $owner;
@@ -473,23 +475,25 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
       //$content = $this->buildTagsView($repository);
 
-      $size = $repository->getCommitCount();
-      if ($size) {
-        /*$history_uri = $repository->generateURI(
-          array(
-            'action' => 'history',
-          ));
-
-        $item->addAttribute(
-          phutil_tag(
-            'a',
+      if (!$noDocs && $repo_count <= 1) {
+        $size = $repository->getCommitCount();
+        if ($size) {
+          /*$history_uri = $repository->generateURI(
             array(
-              'href' => $history_uri,
-            ),
-            pht('%s Commit(s)', new PhutilNumber($size))));*/
-        $item["contributors"] = $this->getCommitAuthorsJSON($repository);
-      } else {
-        //$item->addAttribute(pht('No Commits'));
+              'action' => 'history',
+            ));
+
+          $item->addAttribute(
+            phutil_tag(
+              'a',
+              array(
+                'href' => $history_uri,
+              ),
+              pht('%s Commit(s)', new PhutilNumber($size))));*/
+          $item["contributors"] = $this->getCommitAuthorsJSON($repository);
+        } else {
+          //$item->addAttribute(pht('No Commits'));
+        }
       }
 
       $tokens_given = id(new PhabricatorTokenGivenQuery())
