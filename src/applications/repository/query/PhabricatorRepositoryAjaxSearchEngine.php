@@ -428,7 +428,6 @@ final class PhabricatorRepositoryAjaxSearchEngine
           'phid = %s',
           $owner);
 
-        if (!$noDocs && $repo_count <= 1) {
           if ($user) {
             $owner = $user->getUserName();
           } else {
@@ -466,8 +465,7 @@ final class PhabricatorRepositoryAjaxSearchEngine
               }
             }
 
-          }//
-        }//if (!$noDocs && $repo_count <= 1)
+          }
       }
 
       $item["owner"] = $owner;
@@ -475,26 +473,25 @@ final class PhabricatorRepositoryAjaxSearchEngine
 
       //$content = $this->buildTagsView($repository);
 
-      if (!$noDocs && $repo_count <= 1) {
-        $size = $repository->getCommitCount();
-        if ($size) {
-          /*$history_uri = $repository->generateURI(
-            array(
-              'action' => 'history',
-            ));
+      $size = $repository->getCommitCount();
+      if ($size) {
+        /*$history_uri = $repository->generateURI(
+          array(
+            'action' => 'history',
+          ));
 
-          $item->addAttribute(
-            phutil_tag(
-              'a',
-              array(
-                'href' => $history_uri,
-              ),
-              pht('%s Commit(s)', new PhutilNumber($size))));*/
-          $item["contributors"] = $this->getCommitAuthorsJSON($repository);
-        } else {
-          //$item->addAttribute(pht('No Commits'));
-        }
+        $item->addAttribute(
+          phutil_tag(
+            'a',
+            array(
+              'href' => $history_uri,
+            ),
+            pht('%s Commit(s)', new PhutilNumber($size))));*/
+        $item["contributors"] = $this->getCommitAuthorsJSON($repository);
+      } else {
+        //$item->addAttribute(pht('No Commits'));
       }
+
 
       $tokens_given = id(new PhabricatorTokenGivenQuery())
         ->setViewer($viewer)
