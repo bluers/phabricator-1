@@ -94,7 +94,7 @@ final class PhabricatorAuthStartController
 
     $next_uri = $request->getStr('next');
     if (!strlen($next_uri)) {
-      if ($this->getDelegatingController()) {
+      if ($this->getDelegatingController() && !($this->getDelegatingController() instanceof Phabricator404Controller)) {
         // Only set a next URI from the request path if this controller was
         // delegated to, which happens when a user tries to view a page which
         // requires them to login.
