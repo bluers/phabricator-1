@@ -31,11 +31,22 @@ final class DiffusionDownloadController extends DiffusionController {
 
       $commitIdentifier = substr($commit,5);
       $commitIdentifier = rtrim($commitIdentifier, '/');
-      $cmd = "cd $tempdir_proj && svn co file://$localPath$commit $commitIdentifier && tar -cvzf $commitIdentifier.tar.gz $commitIdentifier";
+      $commitIdentifierEncoded = urlencode($commitIdentifier);
+
+      $commitEncoded = str_replace($commitIdentifier, $commitIdentifierEncoded, $commit);
+      $cmd = "cd $tempdir_proj && svn export file://$localPath$commitEncoded $commitIdentifierEncoded && tar -cvzf $commitIdentifierEncoded.tar.gz $commitIdentifierEncoded";
       exec($cmd);
-      $file_name = "$tempdir_proj"."$commitIdentifier.tar.gz";
+      $file_name = "$tempdir_proj"."$commitIdentifierEncoded.tar.gz";
 
       PhabricatorRepositoryDownloads::incrementDownloads($repo->getPHID()."_".$commitIdentifier);
+
+      if(is_file("$tempdir_proj"."$commitIdentifierEncoded")){
+        $file_name = "$tempdir_proj"."$commitIdentifierEncoded";
+        return id(new AphrontFileResponse())
+          ->setDownload("$commitIdentifier")
+          ->setMimeType('application/gzip')
+          ->setContent(file_get_contents($file_name));
+      }
 
       return id(new AphrontFileResponse())
         ->setDownload("$name-$commitIdentifier.tar.gz")
