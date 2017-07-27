@@ -34,7 +34,7 @@ final class DiffusionDownloadController extends DiffusionController {
       $commitIdentifierEncoded = urlencode($commitIdentifier);
 
       $commitEncoded = str_replace($commitIdentifier, $commitIdentifierEncoded, $commit);
-      $cmd = "cd $tempdir_proj && svn export file://$localPath$commitEncoded $commitIdentifierEncoded && tar -cvzf $commitIdentifierEncoded.tar.gz $commitIdentifierEncoded";
+      $cmd = "cd $tempdir_proj && svn export file://$localPath$commitEncoded $commitIdentifierEncoded && tar --old-archive -cvzf $commitIdentifierEncoded.tar.gz $commitIdentifierEncoded";
       exec($cmd);
       $file_name = "$tempdir_proj"."$commitIdentifierEncoded.tar.gz";
 
@@ -57,7 +57,7 @@ final class DiffusionDownloadController extends DiffusionController {
       // Figure out if we're browsing a directory, a file, or a search result
       // list.
 
-      $cmd = "cd $tempdir_proj && git clone $localPath $commit && cd $commit && git checkout $commit && cd .. && tar -cvzf $commit.tar.gz $commit";
+      $cmd = "cd $tempdir_proj && git clone $localPath $commit && cd $commit && git checkout $commit && cd .. && tar --old-archive -cvzf $commit.tar.gz $commit";
       exec($cmd);
       $file_name = "$tempdir_proj"."$commit.tar.gz";
 
