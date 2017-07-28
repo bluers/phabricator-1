@@ -17,6 +17,12 @@ final class DiffusionRepositoryURIsManagementPanel
     return 400;
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository)
+  {
+    return false;
+  }
+
   public function buildManagementPanelContent() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();

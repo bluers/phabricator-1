@@ -25,6 +25,11 @@ final class DiffusionRepositoryStorageManagementPanel
     }
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository) {
+    return false;
+  }
+
   public function buildManagementPanelContent() {
     return array(
       $this->buildStorageStatusPanel(),

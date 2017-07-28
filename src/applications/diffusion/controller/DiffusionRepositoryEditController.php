@@ -58,10 +58,11 @@ final class DiffusionRepositoryEditController
 
     $hints = id(new AphrontMultiColumnView())
       ->setFluidLayout(true);
-
+/*
     $observe_href = PhabricatorEnv::getDoclink(
       'Diffusion User Guide: Existing Repositories');
 
+    屏蔽这个hint
     $hints->addColumn(
       id(new PHUIActionPanelView())
         ->setIcon('fa-book')
@@ -71,7 +72,7 @@ final class DiffusionRepositoryEditController
           pht(
             'Review the documentation describing how to import or observe an '.
             'existing repository.')));
-
+  */
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(

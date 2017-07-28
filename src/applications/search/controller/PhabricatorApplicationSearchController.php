@@ -308,6 +308,9 @@ final class PhabricatorApplicationSearchController
             }
           }
 
+          //屏蔽Use Results...
+          $use_actions = null;
+
           if ($use_actions) {
             $use_dropdown = $this->newUseResultsDropdown(
               $saved_query,

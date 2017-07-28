@@ -15,7 +15,7 @@ final class DiffusionRepositorySubversionManagementPanel
 
   public function shouldEnableForRepository(
     PhabricatorRepository $repository) {
-    return $repository->isSVN();
+    return false;//$repository->isSVN();
   }
 
   public function getManagementPanelIcon() {

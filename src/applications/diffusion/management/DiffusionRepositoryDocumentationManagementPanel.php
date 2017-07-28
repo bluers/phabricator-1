@@ -21,6 +21,12 @@ final class DiffusionRepositoryDocumentationManagementPanel
     return null;
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository)
+  {
+    return false;
+  }
+
   public function getPanelNavigationURI() {
     return PhabricatorEnv::getDoclink(
       'Diffusion User Guide: Managing Repositories');
