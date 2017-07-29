@@ -13,6 +13,7 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
   private $score;
   private $symbolLanguages;
   private $dateCreated;
+  private $dateUpdated;
   private $descriptionView;
   private $contributer;
   private $cloneURL;
@@ -198,6 +199,7 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
   }
 
   public function setEpoch($epoch) {
+    $this->dateUpdated = $epoch;
     $date = phabricator_datetime($epoch, $this->getUser());
     $this->addIcon('none', $date);
     return $this;
@@ -363,6 +365,14 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
       $repo_name);
 
     $dateCreated = date('Y-m-d', $this->dateCreated);
+
+    if ($this->dateUpdated){
+      $dateUpdated = date('Y-m-d', $this->dateUpdated);
+    }
+    else{
+      $dateUpdated = pht('None');
+    }
+
     $symbol = $this->symbolLanguages;
     $attrs = null;
     if ($this->organizations) {
@@ -452,16 +462,17 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
       }
     }
 
-    $addr_html = $this->cloneURL->render()->getHTMLContent();
+    $addr_tag = $this->cloneURL;
+    $addr_html = $addr_tag->getHTMLContent();
     $frame_html = "<div class=\"remarkup-table-wrap\"><table class=\"remarkup-table\" style=\"width:100%\">
-<tbody><tr><td>项目地址</td><td colspan='7'>$addr_html</td></tr>
-<tr><td>创建者</td><td>$owner</td>
+<tbody>
+<tr><td colspan='8'>$description</td></tr>
+<tr>
 <td>单位</td><td>$attrs</td>
+<td>作者</td><td>$owner</td>
 <td>开发语言</td><td>$symbol</td>
-<td>创建时间</td><td>$dateCreated</td>
+<td>更新时间</td><td>$dateUpdated</td>
 </tr>
-<tr><td>贡献者</td><td colspan='7'>$contributer</td></tr>
-<tr><td>功能描述</td><td colspan='7'>$description</td></tr>
 </tbody></table></div>";
 
     $table = phutil_tag(
@@ -538,7 +549,7 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
           $this->headIcons,
           $header_name,
           $header_link,
-          $score_tag,
+         // $score_tag,
         )));
 
     $frame = phutil_tag(
@@ -548,6 +559,7 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
       ),
       array(
         $header,
+        $addr_tag,
         $table,
       ));
 
