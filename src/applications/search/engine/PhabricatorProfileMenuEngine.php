@@ -387,6 +387,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $nav->selectFilter(null);
 
+    $menu_items = $nav->getMenu()->getItems();
+    $menu_count = count($menu_items);
+    if($menu_count > 0){
+      $menu_type = $menu_items[$menu_count - 1]->getType();
+      if (strcmp(PHUIListItemView::TYPE_LABEL, $menu_type) == 0){
+        $nav->getMenu()->removeMenuItemAtIndex($menu_count - 1);
+      }
+    }
+
+
     $this->navigation = $nav;
     return $this->navigation;
   }
@@ -555,6 +565,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         ->setMenuItemOrder($order);
 
       if (!$builtin->shouldEnableForObject($object)) {
+        continue;
+      }
+
+      if(strcmp("item.configure", $builtin_key) == 0 && !$viewer->getIsAdmin()){
+        unset($map[$builtin_key]);
+        continue;
+      }
+      else if(strcmp("home.launcher", $builtin_key) == 0 && !$viewer->getIsAdmin()){
+        unset($map[$builtin_key]);
         continue;
       }
 
