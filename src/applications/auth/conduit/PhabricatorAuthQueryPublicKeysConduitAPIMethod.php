@@ -68,6 +68,7 @@ final class PhabricatorAuthQueryPublicKeysConduitAPIMethod
         'objectPHID' => $public_key->getObjectPHID(),
         'isTrusted' => (bool)$public_key->getIsTrusted(),
         'key' => $public_key->getEntireKey(),
+        'dateCreated' => $public_key->getDateCreated()
       );
     }
 

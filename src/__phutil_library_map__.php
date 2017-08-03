@@ -1972,6 +1972,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthFactorConfig' => 'applications/auth/storage/PhabricatorAuthFactorConfig.php',
     'PhabricatorAuthFactorTestCase' => 'applications/auth/factor/__tests__/PhabricatorAuthFactorTestCase.php',
     'PhabricatorAuthFinishController' => 'applications/auth/controller/PhabricatorAuthFinishController.php',
+    'PhabricatorAuthGeneratePublicKeysConduitAPIMethod' => 'applications/auth/conduit/PhabricatorAuthGeneratePublicKeysConduitAPIMethod.php',
     'PhabricatorAuthHMACKey' => 'applications/auth/storage/PhabricatorAuthHMACKey.php',
     'PhabricatorAuthHighSecurityRequiredException' => 'applications/auth/exception/PhabricatorAuthHighSecurityRequiredException.php',
     'PhabricatorAuthHighSecurityToken' => 'applications/auth/data/PhabricatorAuthHighSecurityToken.php',
@@ -4818,6 +4819,7 @@ phutil_register_library_map(array(
   'function' => array(
     'celerity_generate_unique_node_id' => 'applications/celerity/api.php',
     'celerity_get_resource_uri' => 'applications/celerity/api.php',
+    'exec_timeout' => 'applications/diffusion/controller/DiffusionDownloadController.php',
     'javelin_tag' => 'infrastructure/javelin/markup.php',
     'phabricator_date' => 'view/viewutils.php',
     'phabricator_datetime' => 'view/viewutils.php',
@@ -7086,6 +7088,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthFactorConfig' => 'PhabricatorAuthDAO',
     'PhabricatorAuthFactorTestCase' => 'PhabricatorTestCase',
     'PhabricatorAuthFinishController' => 'PhabricatorAuthController',
+    'PhabricatorAuthGeneratePublicKeysConduitAPIMethod' => 'PhabricatorAuthConduitAPIMethod',
     'PhabricatorAuthHMACKey' => 'PhabricatorAuthDAO',
     'PhabricatorAuthHighSecurityRequiredException' => 'Exception',
     'PhabricatorAuthHighSecurityToken' => 'Phobject',
