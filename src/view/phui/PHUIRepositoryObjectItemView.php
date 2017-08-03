@@ -466,13 +466,13 @@ class PHUIRepositoryObjectItemView extends PHUIObjectItemView
     $addr_html = $addr_tag->getHTMLContent();
     $frame_html = "<div class=\"remarkup-table-wrap\"><table class=\"remarkup-table\" style=\"width:100%\">
 <tbody>
-<tr><td colspan='8'>$description</td></tr>
 <tr>
 <td>单位</td><td>$attrs</td>
 <td>作者</td><td>$owner</td>
 <td>开发语言</td><td>$symbol</td>
 <td>更新时间</td><td>$dateUpdated</td>
 </tr>
+<tr><td colspan='8'>$description</td></tr>
 </tbody></table></div>";
 
     $table = phutil_tag(

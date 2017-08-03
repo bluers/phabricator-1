@@ -53,6 +53,12 @@ final class PHUIListView extends AphrontTagView {
     return $item;
   }
 
+  public function removeMenuItemAtIndex($index){
+    unset($this->items[$index]);
+    $this->items = array_values($this->items);
+    return $this;
+  }
+
   public function addMenuItem(PHUIListItemView $item) {
     return $this->addMenuItemAfter(null, $item);
   }

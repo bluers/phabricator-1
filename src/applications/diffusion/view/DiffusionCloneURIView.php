@@ -84,6 +84,7 @@ final class DiffusionCloneURIView extends AphrontView {
           'selectID' => $uri_id,
         ));
 
+
     switch ($uri->getEffectiveIOType()) {
       case PhabricatorRepositoryURI::IO_READ:
       case PhabricatorRepositoryURI::IO_READWRITE:
@@ -124,7 +125,8 @@ final class DiffusionCloneURIView extends AphrontView {
     $cells = array();
     $cells[] = phutil_tag('td', array(), $input);
     $cells[] = phutil_tag('th', array(), $io);
-    $cells[] = phutil_tag('th', array(), $credentials);
+    //屏蔽Manage SSH Keys和Manage Password
+    //$cells[] = phutil_tag('th', array(), $credentials);
 
     $row = phutil_tag('tr', array(), $cells);
 

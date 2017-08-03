@@ -174,6 +174,7 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
       $suggest = preg_replace('([^A-Za-z0-9/!().,;{}^&*%~])', '', $suggest);
       $suggest = substr($suggest, 0, 20);
 
+      /* 屏蔽suggest password
       if ($is_serious) {
         $form->appendRemarkupInstructions(
           pht(
@@ -191,11 +192,12 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
             "\n\n".
             "`%s`",
             $suggest));
-      }
+      }*/
     }
 
     $hash_envelope = new PhutilOpaqueEnvelope($vcspassword->getPasswordHash());
 
+    /*
     $form->appendChild(
       id(new AphrontFormStaticControl())
         ->setLabel(pht('Current Algorithm'))
@@ -206,7 +208,7 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
       id(new AphrontFormStaticControl())
         ->setLabel(pht('Best Available Algorithm'))
         ->setValue(PhabricatorPasswordHasher::getBestAlgorithmName()));
-
+*/
     if (strlen($hash_envelope->openEnvelope())) {
       try {
         $can_upgrade = PhabricatorPasswordHasher::canUpgradeHash(
