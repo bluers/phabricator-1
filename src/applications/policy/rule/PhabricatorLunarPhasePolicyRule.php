@@ -1,5 +1,5 @@
 <?php
-
+/*
 final class PhabricatorLunarPhasePolicyRule extends PhabricatorPolicyRule {
 
   const PHASE_FULL   = 'full';
@@ -52,3 +52,4 @@ final class PhabricatorLunarPhasePolicyRule extends PhabricatorPolicyRule {
   }
 
 }
+*/
