@@ -37,6 +37,12 @@ final class DiffusionRepositoryActionsManagementPanel
     );
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository)
+  {
+    return false;//屏蔽Repository管理界面的左侧Action按钮
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
