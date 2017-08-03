@@ -37,7 +37,12 @@ final class PhabricatorActionListView extends AphrontTagView {
         'actions' => $this->actions,
       ));
     $event->setUser($viewer);
-    PhutilEventEngine::dispatchEvent($event);
+    if ($this->object instanceof PhabricatorRepository){
+      ;//对于代码库，屏蔽Flag for later和Award tokens
+    }
+    else{
+      PhutilEventEngine::dispatchEvent($event);
+    }
 
     $actions = $event->getValue('actions');
     if (!$actions) {
