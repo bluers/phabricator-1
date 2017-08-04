@@ -224,6 +224,7 @@ final class PhabricatorAuthRegisterController
     $value_realname = $default_realname;
     $value_email = $default_email;
     $value_password = null;
+    $value_asdev = false;
 
     $require_real_name = PhabricatorEnv::getEnvConfig('user.require-real-name');
 
@@ -335,6 +336,8 @@ final class PhabricatorAuthRegisterController
         }
       }
 
+      $value_asdev = $request->getBool('asdev');
+
       if (!$errors) {
         $image = $this->loadProfilePicture($account);
         if ($image) {
@@ -401,6 +404,53 @@ final class PhabricatorAuthRegisterController
             $allow_reassign_email = false;
           }
 
+          $project = null;
+          if ($value_asdev){
+            //添加用户到特定的project中，如果该project不存在，那么手动创建该project
+            $query = id(new PhabricatorProjectQuery())
+              ->needImages(false);
+            $tokens = PhabricatorTypeaheadDatasource::tokenizeString('开发人员待批准');
+            $query->withNameTokens($tokens);//->setParameter('status', 'archived');
+            $query->setViewer(PhabricatorUser::getOmnipotentUser());
+            $projects = $query->execute();
+
+            if(count($projects) > 0){
+
+            }
+            else{
+              //创建project
+              $viewer = id(new PhabricatorUser())->loadOneWhere(
+                'username = %s',
+                'admin');
+
+              $project = PhabricatorProject::initializeNewProject($viewer);
+
+              $xactions = array();
+
+              $xactions[] = id(new PhabricatorProjectTransaction())
+                ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+
+              $xactions[] = id(new PhabricatorProjectTransaction())
+                ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+                ->setNewValue('开发人员待批准');
+
+
+              $editor = id(new PhabricatorProjectTransactionEditor())
+                ->setActor($viewer)
+                ->setContentSource(PhabricatorContentSource::newForSource(PhabricatorWebContentSource::SOURCECONST))
+                ->setContinueOnNoEffect(true)
+                ->setContinueOnMissingFields(true)
+                ->applyTransactions($project, $xactions);
+
+              $projects = $query->execute();
+
+            }
+            $projects = array_values($projects);
+
+            $project = $projects[0];
+
+          }
+
           $user->openTransaction();
 
             $editor = id(new PhabricatorUserEditor())
@@ -432,6 +482,34 @@ final class PhabricatorAuthRegisterController
 
           if ($invite) {
             $invite->setAcceptedByPHID($user->getPHID())->save();
+          }
+
+          if ($value_asdev){
+            $viewer = id(new PhabricatorUser())->loadOneWhere(
+              'username = %s',
+              'admin');
+
+            $edge_action = '+';
+
+            $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+            $member_spec = array(
+              $edge_action => array($user->getPHID() => $user->getPHID()),
+            );
+
+            $xactions = array();
+            $xactions[] = id(new PhabricatorProjectTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+              ->setMetadataValue('edge:type', $type_member)
+              ->setNewValue($member_spec);
+
+
+            $editor = id(new PhabricatorProjectTransactionEditor())
+              ->setActor($viewer)
+              ->setContentSource(PhabricatorContentSource::newForSource(PhabricatorWebContentSource::SOURCECONST))
+              ->setContinueOnNoEffect(true)
+              ->setContinueOnMissingFields(true)
+              ->applyTransactions($project, $xactions);
           }
 
           return $this->loginUser($user);
@@ -537,6 +615,16 @@ final class PhabricatorAuthRegisterController
           ->setLabel(pht('Captcha'))
           ->setError($e_captcha));
     }
+
+    $form->appendChild(
+      id(new AphrontFormCheckboxControl())
+        ->setLabel(pht('As Developer'))
+        ->addCheckbox(
+          'asdev',
+          1,
+          '',
+          $value_asdev)
+    );
 
     $submit = id(new AphrontFormSubmitControl());
 
