@@ -44,6 +44,7 @@ final class PhabricatorUser
   protected $isEmailVerified = 0;
   protected $isApproved = 0;
   protected $isEnrolledInMultiFactor = 0;
+  protected $requestAsDev = false;
 
   protected $accountSecret;
 
@@ -83,6 +84,8 @@ final class PhabricatorUser
         return (bool)$this->isEmailVerified;
       case 'isApproved':
         return (bool)$this->isApproved;
+      case 'requestAsDev':
+        return (bool)$this->requestAsDev;
       default:
         return parent::readField($field);
     }
@@ -223,6 +226,7 @@ final class PhabricatorUser
         'isMailingList' => 'bool',
         'isDisabled' => 'bool',
         'isAdmin' => 'bool',
+        'requestAsDev' => 'bool',
         'isEmailVerified' => 'uint32',
         'isApproved' => 'uint32',
         'accountSecret' => 'bytes64',

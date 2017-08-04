@@ -404,6 +404,8 @@ final class PhabricatorAuthRegisterController
             $allow_reassign_email = false;
           }
 
+          $user->setRequestAsDev($value_asdev);
+
           $project = null;
           if ($value_asdev){
             //添加用户到特定的project中，如果该project不存在，那么手动创建该project

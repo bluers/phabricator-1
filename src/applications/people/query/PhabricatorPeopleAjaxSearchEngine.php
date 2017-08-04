@@ -515,7 +515,8 @@ final class PhabricatorPeopleAjaxSearchEngine
           'realName' => $object->getRealName(),
           'name' => $handle->getName(),
           'imageUrl' => $handle->getImageURI(),
-          'uri' => $handle->getURI()
+          'uri' => $handle->getURI(),
+          'regAsDev' => $object->getRequestAsDev()
         );
       }
     }
