@@ -852,11 +852,13 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setHref($href)
         ->setIcon('fa-exclamation-triangle')
         ->setDisabled(!$href));
-    */
 
 
-    $repository = $drequest->getRepository();
 
+    $repository = $drequest->getRepository();*/
+
+    /*
+     * 屏蔽代码库的Owners显示
     $owners = 'PhabricatorOwnersApplication';
     if (PhabricatorApplication::isClassInstalled($owners)) {
       $package_query = id(new PhabricatorOwnersPackageQuery())
@@ -895,7 +897,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $curtain->newPanel()
         ->setHeaderText(pht('Owners'))
         ->appendChild($ownership);
-    }
+    }*/
 
     return $curtain;
   }
