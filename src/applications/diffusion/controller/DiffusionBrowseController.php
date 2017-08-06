@@ -827,6 +827,8 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setUser($viewer)
         ->setRenderAsForm($viewer->isLoggedIn()));
 
+    /*
+     * 屏蔽Lint消息
     $href = null;
     if ($this->getRequest()->getStr('lint') !== null) {
       $lint_text = pht('Hide %d Lint Message(s)', count($this->lintMessages));
@@ -850,6 +852,7 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setHref($href)
         ->setIcon('fa-exclamation-triangle')
         ->setDisabled(!$href));
+    */
 
 
     $repository = $drequest->getRepository();
