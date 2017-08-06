@@ -167,7 +167,30 @@ final class PhabricatorRepositorySearchEngine
     }
 
     $list_group = new PHUIObjectItemListView();
-    $repositories_groupby = array("" => $repositories);
+
+    $repositories_groupby = array($viewer->getUsername() => array(),"" => array(), );
+
+    foreach ($repositories as $repository){
+      $owner = $repository->getEditPolicy();
+      if($owner && $owner != 'admin'){
+        $user = id(new PhabricatorUser())->loadOneWhere(
+          'phid = %s',
+          $owner);
+
+        if($user){
+          $owner = $user->getUserName();
+          if($owner == $viewer->getUsername()){
+            $repositories_groupby[$owner][] = $repository;
+          }
+          else{
+            $repositories_groupby[""][] = $repository;
+          }
+        }
+        else{
+          $repositories_groupby[""][] = $repository;
+        }
+      }
+    }
 
     foreach ($repositories_groupby as $key => $repositores_group){
 
