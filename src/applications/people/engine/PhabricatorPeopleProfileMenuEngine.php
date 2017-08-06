@@ -26,6 +26,7 @@ final class PhabricatorPeopleProfileMenuEngine
 
     $items = array();
 
+    /*
     $items[] = $this->newItem()
       ->setBuiltinKey(self::ITEM_PICTURE)
       ->setMenuItemKey(PhabricatorPeoplePictureProfileMenuItem::MENUITEMKEY);
@@ -64,6 +65,26 @@ final class PhabricatorPeopleProfileMenuEngine
     $items[] = $this->newItem()
       ->setBuiltinKey(self::ITEM_MANAGE)
       ->setMenuItemKey(PhabricatorPeopleManageProfileMenuItem::MENUITEMKEY);
+*/
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorPeopleBecomeAdminProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemKey(PhabricatorPeopleBecomeAdminProfileMenuItem::MENUITEMKEY);
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorPeopleBecomeDevProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemKey(PhabricatorPeopleBecomeDevProfileMenuItem::MENUITEMKEY);
+
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorPeopleDisableProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemKey(PhabricatorPeopleDisableProfileMenuItem::MENUITEMKEY);
+
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorPeopleDeleteProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemKey(PhabricatorPeopleDeleteProfileMenuItem::MENUITEMKEY);
+
 
     return $items;
   }

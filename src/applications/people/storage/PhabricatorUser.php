@@ -126,6 +126,32 @@ final class PhabricatorUser
   }
 
 
+  public function getIsDev(){
+
+    $projectQuery = id(new PhabricatorProjectQuery())
+      ->setViewer($this)
+      ->withMemberPHIDs(array($this->getPHID()));
+
+    $policy_exception = null;
+    $project = null;
+    try {
+      $projects = $projectQuery->execute();
+      foreach ($projects as $project){
+        if (strcmp($project->getName(), '开发人员') == 0
+          || strcmp($project->getName(), 'Developer') == 0
+          || strcmp($project->getName(), 'Developers') == 0
+          | strcmp($project->getName(), 'Dev') == 0){
+          return true;
+          break;
+        }
+      }
+    } catch (PhabricatorPolicyException $ex) {
+      $projects = null;
+    }
+
+    return false;
+  }
+
   /**
    * Is this a user who we can reasonably expect to respond to requests?
    *

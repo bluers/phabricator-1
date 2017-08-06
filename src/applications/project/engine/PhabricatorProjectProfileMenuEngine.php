@@ -49,6 +49,18 @@ final class PhabricatorProjectProfileMenuEngine
       ->setBuiltinKey(PhabricatorProject::ITEM_MANAGE)
       ->setMenuItemKey(PhabricatorProjectManageProfileMenuItem::MENUITEMKEY);
 
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProjectEditDetailsProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemKey(PhabricatorProjectEditDetailsProfileMenuItem::MENUITEMKEY);
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProjectEditPictureProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemKey(PhabricatorProjectEditPictureProfileMenuItem::MENUITEMKEY);
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProjectArchiveProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemKey(PhabricatorProjectArchiveProfileMenuItem::MENUITEMKEY);
+
     return $items;
   }
 

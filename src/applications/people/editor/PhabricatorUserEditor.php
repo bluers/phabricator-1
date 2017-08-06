@@ -244,6 +244,158 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     return $this;
   }
 
+  public function createOrGetProjectByName($name){
+    $project = null;
+    //添加用户到特定的project中，如果该project不存在，那么手动创建该project
+    $query = id(new PhabricatorProjectQuery())
+      ->needImages(false);
+    $tokens = PhabricatorTypeaheadDatasource::tokenizeString($name);
+    $query->withNameTokens($tokens);//->setParameter('status', 'archived');
+    $query->setViewer(PhabricatorUser::getOmnipotentUser());
+    $projects = $query->execute();
+
+    if(count($projects) > 0){
+
+    }
+    else{
+      //创建project
+      $viewer = id(new PhabricatorUser())->loadOneWhere(
+        'username = %s',
+        'admin');
+
+      $project = PhabricatorProject::initializeNewProject($viewer);
+
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+        ->setNewValue($name);
+
+
+      $editor = id(new PhabricatorProjectTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSource(PhabricatorContentSource::newForSource(PhabricatorWebContentSource::SOURCECONST))
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($project, $xactions);
+
+      $projects = $query->execute();
+
+    }
+    $projects = array_values($projects);
+
+    foreach ($projects as $p){
+      if(strcmp($p->getName(), $name) == 0){
+        $project = $p;
+        break;
+      }
+    }
+    return $project;
+
+  }
+
+  /**
+   * @task role
+   */
+  public function makeDevUser(PhabricatorUser $user, $dev) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception(pht('User has not been created yet!'));
+    }
+
+
+    $devprj_pending = $this->createOrGetProjectByName('开发人员待批准');
+    $devprj = $this->createOrGetProjectByName('开发人员');
+
+    $user->reload();
+
+    $log = PhabricatorUserLog::initializeNewLog(
+      $actor,
+      $user->getPHID(),
+      PhabricatorUserLog::ACTION_DEV);
+    $log->setOldValue(0);
+    $log->setNewValue($dev);
+
+    if($dev){
+      $edge_action = '+';
+
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+      $member_spec = array(
+        $edge_action => array($user->getPHID() => $user->getPHID()),
+      );
+
+      $xactions = array();
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $type_member)
+        ->setNewValue($member_spec);
+
+
+      $editor = id(new PhabricatorProjectTransactionEditor())
+        ->setActor($actor)
+        ->setContentSource(PhabricatorContentSource::newForSource(PhabricatorWebContentSource::SOURCECONST))
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($devprj, $xactions);
+
+      $edge_action = '-';
+
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+      $member_spec = array(
+        $edge_action => array($user->getPHID() => $user->getPHID()),
+      );
+
+      $xactions = array();
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $type_member)
+        ->setNewValue($member_spec);
+
+
+      $editor = id(new PhabricatorProjectTransactionEditor())
+        ->setActor($actor)
+        ->setContentSource(PhabricatorContentSource::newForSource(PhabricatorWebContentSource::SOURCECONST))
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($devprj_pending, $xactions);
+    }
+    else{
+      $edge_action = '-';
+
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+      $member_spec = array(
+        $edge_action => array($user->getPHID() => $user->getPHID()),
+      );
+
+      $xactions = array();
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $type_member)
+        ->setNewValue($member_spec);
+
+
+      $editor = id(new PhabricatorProjectTransactionEditor())
+        ->setActor($actor)
+        ->setContentSource(PhabricatorContentSource::newForSource(PhabricatorWebContentSource::SOURCECONST))
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($devprj, $xactions);
+    }
+
+
+    $log->save();
+
+    return $this;
+  }
+
+
   /**
    * @task role
    */

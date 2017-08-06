@@ -11,7 +11,9 @@ final class UserJoinDevConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   protected function defineParamTypes() {
-    return array();
+    return array(
+      'dev' => 'required bool',
+    );
   }
 
   protected function defineReturnType() {
@@ -29,8 +31,10 @@ final class UserJoinDevConduitAPIMethod extends UserConduitAPIMethod {
       ->withPHIDs(array($request->getUser()->getPHID()))
       ->executeOne();
 
+    $dev = $request->getValue("dev")?true:false;
+
     $user = $person;
-    $user->setRequestAsDev(true);
+    $user->setRequestAsDev($dev?1:0);
 
     //添加用户到特定的project中，如果该project不存在，那么手动创建该project
     $query = id(new PhabricatorProjectQuery())
@@ -85,7 +89,12 @@ final class UserJoinDevConduitAPIMethod extends UserConduitAPIMethod {
 
     $user->saveTransaction();
 
-    $edge_action = '+';
+    if($dev){
+      $edge_action = '+';
+    }
+    else {
+      $edge_action = '-';
+    }
 
     $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
 
