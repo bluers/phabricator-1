@@ -514,6 +514,19 @@ final class PhabricatorAuthRegisterController
               ->applyTransactions($project, $xactions);
           }
 
+          $vcspassword = id(new PhabricatorRepositoryVCSPassword())
+            ->loadOneWhere(
+              'userPHID = %s',
+              $user->getPHID());
+          if (!$vcspassword) {
+            $vcspassword = id(new PhabricatorRepositoryVCSPassword());
+            $vcspassword->setUserPHID($user->getPHID());
+          }
+
+          $envelope = new PhutilOpaqueEnvelope($value_password);
+          $vcspassword->setPassword($envelope, $user);
+          $vcspassword->save();
+
           return $this->loginUser($user);
         } catch (AphrontDuplicateKeyQueryException $exception) {
           $same_username = id(new PhabricatorUser())->loadOneWhere(

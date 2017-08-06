@@ -26,10 +26,12 @@ final class DiffusionRepositoryListController extends DiffusionController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    id(new DiffusionRepositoryEditEngine())
+    /*
+     * 屏蔽代码库列表右上角的 "创建仓库" 按钮
+     * id(new DiffusionRepositoryEditEngine())
       ->setViewer($this->getViewer())
       ->addActionToCrumbs($crumbs);
-
+    */
     return $crumbs;
   }
 

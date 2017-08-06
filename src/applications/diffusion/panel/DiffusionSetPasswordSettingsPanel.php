@@ -273,7 +273,7 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
     return array(
       $saved,
       $object_box,
-      $remove_box,
+   //   $remove_box, //屏蔽 Remove VCS Password的box，不提供删除VCS Password的功能了
     );
   }
 
