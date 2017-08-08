@@ -821,7 +821,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
       ->setHandles($handles)
-      ->setBasePath("/browse/");
+      ->setBasePath("/branches/");
     if ($browse_paths) {
       $browse_table->setPaths($browse_paths);
     } else {
