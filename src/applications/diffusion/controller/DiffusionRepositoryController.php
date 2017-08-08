@@ -5,6 +5,7 @@ final class DiffusionRepositoryController extends DiffusionController {
   private $historyFuture;
   private $browseFuture;
   private $browseDocFuture;
+  private $browseSvnBranchesFuture;
   private $tagFuture;
   private $branchFuture;
 
@@ -51,10 +52,17 @@ final class DiffusionRepositoryController extends DiffusionController {
         // This is a valid branch, so we necessarily have some content.
         $page_has_content = true;
       } else {
-        $empty_title = pht('No Such Branch');
-        $empty_message = pht(
-          'There is no branch named "%s" in this repository.',
-          $drequest->getBranch());
+        if("svn" == $drequest->getRepository()->getVersionControlSystem()){
+          if("" == $drequest->getBranch()){
+            $page_has_content = true;
+          }
+        }
+        else{
+          $empty_title = pht('No Such Branch');
+          $empty_message = pht(
+            'There is no branch named "%s" in this repository.',
+            $drequest->getBranch());
+        }
       }
     }
 
@@ -142,6 +150,16 @@ final class DiffusionRepositoryController extends DiffusionController {
         'path' => 'docs',
         'limit' => $browse_pager->getPageSize() + 1,
       ));
+
+    if($drequest->getRepository()->getVersionControlSystem() == "svn"){
+      $this->browseSvnBranchesFuture = $this->callConduitMethod(
+        'diffusion.browsequery',
+        array(
+          'commit' => $commit,
+          'path' => 'branches',
+          'limit' => $browse_pager->getPageSize() + 1,
+        ));
+    }
 
     if ($this->needTagFuture()) {
       $tag_limit = $this->getTagLimit();
@@ -257,6 +275,31 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browsedoc_exception = $ex;
     }
 
+    try{
+      $svnBranches_exception = null;
+      $svnBranches_results = $this->browseSvnBranchesFuture->resolve();
+      $svnBranches = DiffusionBrowseResultSet::newFromConduit(
+        $svnBranches_results);
+      $svnBranches = $svnBranches->getPaths();
+      $svnBranches = $browse_pager->sliceResults($svnBranches);
+
+      foreach ($svnBranches as $item) {
+        $data = $item->getLastCommitData();
+        if ($data) {
+          if ($data->getCommitDetail('authorPHID')) {
+            $phids[$data->getCommitDetail('authorPHID')] = true;
+          }
+          if ($data->getCommitDetail('committerPHID')) {
+            $phids[$data->getCommitDetail('committerPHID')] = true;
+          }
+        }
+      }
+    }catch(Exception $ex){
+      $svnBranches = null;
+      $svnBranches_results = null;
+      $svnBranches_exception = $ex;
+    }
+
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
 
@@ -272,6 +315,15 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browsedoc_exception,
       $handles,
       $browse_pager);
+
+    if( $svnBranches != null && count($svnBranches) > 0 ){
+      $content[] = $this->buildBrowseSvnBranchesTable(
+        $svnBranches_results,
+        $svnBranches,
+        $svnBranches_exception,
+        $handles,
+        $browse_pager);
+    }
 
     $content[] = $this->buildBrowseTable(
       $browse_results,
@@ -736,6 +788,81 @@ final class DiffusionRepositoryController extends DiffusionController {
     return $browse_panel;
   }
 
+  private function buildBrowseSvnBranchesTable(
+    $browse_results,
+    $browse_paths,
+    $browse_exception,
+    array $handles,
+    PHUIPagerView $pager) {
+
+    require_celerity_resource('diffusion-icons-css');
+
+    $limit = $this->getBranchLimit();
+    $more_branches = (count($browse_results) > $limit);
+    $branches = array_slice($browse_results, 0, $limit);
+
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    if ($browse_exception) {
+      if ($repository->isImporting()) {
+        // The history table renders a useful message.
+        return null;
+      } else {
+        return $this->renderStatusMessage(
+          pht('Unable to Retrieve Paths'),
+          $browse_exception->getMessage());
+      }
+    }
+
+    $browse_table = id(new DiffusionBrowseTableView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setHandles($handles)
+      ->setBasePath("/browse/");
+    if ($browse_paths) {
+      $browse_table->setPaths($browse_paths);
+    } else {
+      $browse_table->setPaths(array());
+    }
+
+    $browse_uri = $drequest->generateURI(array('action' => 'browse'));
+
+    $browse_panel = id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Branches'));
+
+    if ($more_branches) {
+      $header->setSubheader(pht('Showing %d branches.', $limit));
+    }
+
+    $button = new PHUIButtonView();
+    $button->setText(pht('Show All'));
+    $button->setTag('a');
+    $button->setIcon('fa-code-fork');
+    $button->setHref($drequest->generateURI(
+      array(
+        'action' => 'browse',
+        'path' => 'branches',
+      )));
+
+    $header->addActionLink($button);
+
+    $browse_panel->setHeader($header);
+    $browse_panel->setTable($browse_table);
+
+    $pager->setURI($browse_uri, 'offset');
+
+    if ($pager->willShowPagingControls()) {
+      $browse_panel->setPager($pager);
+    }
+
+    return $browse_panel;
+  }
+
   private function buildBrowseDocTable(
     $browse_results,
     $browse_paths,
@@ -845,7 +972,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $drequest = $this->getDiffusionRequest();
 
     if ($drequest->getBranch() === null) {
-      return false;
+      return true;
     }
 
     return true;
