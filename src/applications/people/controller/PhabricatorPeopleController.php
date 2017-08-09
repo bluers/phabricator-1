@@ -26,6 +26,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
         ->setViewer($viewer)
         ->addNavigationItems($nav->getMenu());
 
+      /* 屏蔽User Administration
       if ($viewer->getIsAdmin()) {
         $nav->addLabel(pht('User Administration'));
         if (PhabricatorLDAPAuthProvider::getLDAPProvider()) {
@@ -35,6 +36,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
         $nav->addFilter('logs', pht('Activity Logs'));
         $nav->addFilter('invite', pht('Email Invitations'));
       }
+      */
     }
 
     return $nav;

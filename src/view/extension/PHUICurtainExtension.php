@@ -72,7 +72,8 @@ abstract class PHUICurtainExtension extends Phobject {
         get_class($application),
         $viewer);
 
-      if (!$has_application) {
+      //对于Diffusion，屏蔽Tokens extension
+      if (!$has_application || ($object instanceof PhabricatorRepository && $key == PhabricatorTokensCurtainExtension::EXTENSIONKEY)) {
         unset($extensions[$key]);
       }
     }

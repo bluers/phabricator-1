@@ -69,9 +69,11 @@ final class PeopleMainMenuBarExtension
       id(new PhabricatorActionView())
         ->appendChild($user_view));
 
+    /*
     $view->addAction(
       id(new PhabricatorActionView())
         ->setType(PhabricatorActionView::TYPE_DIVIDER));
+
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -95,7 +97,8 @@ final class PeopleMainMenuBarExtension
           $view->addAction($link);
         }
       }
-    }
+
+    }*/
 
     $view->addAction(
       id(new PhabricatorActionView())

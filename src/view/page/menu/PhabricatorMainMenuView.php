@@ -132,8 +132,8 @@ final class PhabricatorMainMenuView extends AphrontView {
         $app_button,
         $search_button,
         $this->renderPhabricatorLogo(),
-        $alerts,
-        $aural,
+    //    $alerts,
+    //    $aural,
         $search_menu,
         $menu_bar,
       ));

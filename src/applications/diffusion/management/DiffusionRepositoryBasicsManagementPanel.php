@@ -56,6 +56,8 @@ final class DiffusionRepositoryBasicsManagementPanel
       $activate_label = pht('Activate Repository');
     }
 
+    /*
+     * 屏蔽Allow Dangerous Changes
     $should_dangerous = $repository->shouldAllowDangerousChanges();
     if ($should_dangerous) {
       $dangerous_icon = 'fa-shield';
@@ -65,7 +67,7 @@ final class DiffusionRepositoryBasicsManagementPanel
       $dangerous_icon = 'fa-bullseye';
       $dangerous_name = pht('Allow Dangerous Changes');
       $can_dangerous = ($can_edit && $repository->canAllowDangerousChanges());
-    }
+    }*/
 
     return array(
       id(new PhabricatorActionView())

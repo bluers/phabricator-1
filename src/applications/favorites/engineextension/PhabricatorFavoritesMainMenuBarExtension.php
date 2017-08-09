@@ -6,9 +6,11 @@ final class PhabricatorFavoritesMainMenuBarExtension
   const MAINMENUBARKEY = 'favorites';
 
   public function isExtensionEnabledForViewer(PhabricatorUser $viewer) {
+    return false;
+    /* 屏蔽Favorites menu
     return PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorFavoritesApplication',
-      $viewer);
+      $viewer);*/
   }
 
   public function getExtensionOrder() {
