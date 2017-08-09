@@ -169,12 +169,13 @@ final class DiffusionRepositoryBasicsManagementPanel
     }
     $view->addProperty(pht('Callsign'), $callsign);
 
+    /*
     $short_name = $repository->getRepositorySlug();
     if ($short_name === null) {
       $short_name = phutil_tag('em', array(), pht('No Short Name'));
     }
     $view->addProperty(pht('Short Name'), $short_name);
-
+*/
     $encoding = $repository->getDetail('encoding');
     if (!$encoding) {
       $encoding = phutil_tag('em', array(), pht('Use Default (UTF-8)'));
@@ -193,7 +194,7 @@ final class DiffusionRepositoryBasicsManagementPanel
       }
     }
 
-    $view->addProperty(pht('Dangerous Changes'), $dangerous);
+//    $view->addProperty(pht('Dangerous Changes'), $dangerous);
 
     return $view;
   }
