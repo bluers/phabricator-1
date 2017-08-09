@@ -27,12 +27,13 @@ abstract class HeraldController extends PhabricatorController {
     id(new HeraldRuleSearchEngine())
       ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
-
+/* 屏蔽Utilities
     $nav->addLabel(pht('Utilities'))
         ->addFilter('test', pht('Test Console'))
         ->addFilter('transcript', pht('Transcripts'));
 
     $nav->selectFilter(null);
+*/
 
     return $nav;
   }

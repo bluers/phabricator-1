@@ -4,6 +4,11 @@ final class PhabricatorCalendarEventHeraldAdapter extends HeraldAdapter {
 
   private $object;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   public function getAdapterApplicationClass() {
     return 'PhabricatorCalendarApplication';
   }

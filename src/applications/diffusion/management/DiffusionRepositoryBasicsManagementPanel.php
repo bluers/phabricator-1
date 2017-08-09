@@ -82,12 +82,13 @@ final class DiffusionRepositoryBasicsManagementPanel
         ->setHref($encoding_uri)
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit),
+      /*
       id(new PhabricatorActionView())
         ->setIcon($dangerous_icon)
         ->setName($dangerous_name)
         ->setHref($dangerous_uri)
         ->setDisabled(!$can_dangerous)
-        ->setWorkflow(true),
+        ->setWorkflow(true),*/
       id(new PhabricatorActionView())
         ->setHref($activate_uri)
         ->setIcon($activate_icon)

@@ -48,12 +48,13 @@ final class PhabricatorProjectProfileController
 
     $properties = $this->buildPropertyListView($project);
 
-    $watch_action = $this->renderWatchAction($project);
-    $header->addActionLink($watch_action);
+    //屏蔽Watch Action
+    //$watch_action = $this->renderWatchAction($project);
+    //$header->addActionLink($watch_action);
 
     $milestone_list = $this->buildMilestoneList($project);
     $subproject_list = $this->buildSubprojectList($project);
-
+/*
     $member_list = id(new PhabricatorProjectMemberListView())
       ->setUser($viewer)
       ->setProject($project)
@@ -67,7 +68,7 @@ final class PhabricatorProjectProfileController
       ->setLimit(5)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getWatcherPHIDs());
-
+*/
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::ITEM_PROFILE);
 
@@ -88,22 +89,22 @@ final class PhabricatorProjectProfileController
 
     require_celerity_resource('project-view-css');
 
-    $home = id(new PHUITwoColumnView())
+    $home = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addClass('project-view-home')
       ->addClass('project-view-people-home')
-      ->setMainColumn(
+      ->appendChild(
         array(
           $properties,
           $feed,
-        ))
+        ))/* 屏蔽SideColumn
       ->setSideColumn(
         array(
           $milestone_list,
           $subproject_list,
           $member_list,
           $watcher_list,
-        ));
+        ))*/;
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);

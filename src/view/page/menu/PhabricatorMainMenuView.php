@@ -344,6 +344,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       ->setViewer($viewer);
     $dropdown_data = $dropdown_query->execute();
 
+  /*
     $message_tag = '';
     $message_notification_dropdown = '';
     $conpherence_app = 'PhabricatorConpherenceApplication';
@@ -594,7 +595,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           '');
       }
     }
-
+    */
     $user_dropdown = null;
     $user_tag = null;
     if ($viewer->isLoggedIn()) {
@@ -659,17 +660,17 @@ final class PhabricatorMainMenuView extends AphrontView {
     }
 
     $dropdowns = array(
-      $notification_dropdown,
-      $message_notification_dropdown,
-      $setup_notification_dropdown,
+     // $notification_dropdown,
+     // $message_notification_dropdown,
+     // $setup_notification_dropdown,
       $user_dropdown,
     );
 
     return array(
       array(
-        $bubble_tag,
-        $message_tag,
-        $setup_tag,
+       // $bubble_tag,
+       // $message_tag,
+       // $setup_tag,
         $user_tag,
       ),
       $dropdowns,

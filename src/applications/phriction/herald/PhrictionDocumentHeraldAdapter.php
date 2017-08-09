@@ -4,6 +4,11 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
 
   private $document;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   public function getAdapterApplicationClass() {
     return 'PhabricatorPhrictionApplication';
   }

@@ -32,6 +32,7 @@ final class PhabricatorProjectListView extends AphrontView {
         ->setIcon("{$icon} {$color}");
 
       $icon_name = $project->getDisplayIconName();
+      $icon_name = pht($icon_name);
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($project->getName())

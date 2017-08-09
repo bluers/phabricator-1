@@ -4,6 +4,11 @@ final class HeraldPhamePostAdapter extends HeraldAdapter {
 
   private $post;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   protected function newObject() {
     return new PhamePost();
   }

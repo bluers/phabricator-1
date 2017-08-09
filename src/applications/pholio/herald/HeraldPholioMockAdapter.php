@@ -4,6 +4,11 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
 
   private $mock;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   public function getAdapterApplicationClass() {
     return 'PhabricatorPholioApplication';
   }

@@ -5,6 +5,11 @@ final class PhabricatorMailOutboundMailHeraldAdapter
 
   private $mail;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   public function getAdapterApplicationClass() {
     return 'PhabricatorMetaMTAApplication';
   }

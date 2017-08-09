@@ -4,6 +4,11 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
 
   private $task;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   protected function newObject() {
     return new ManiphestTask();
   }

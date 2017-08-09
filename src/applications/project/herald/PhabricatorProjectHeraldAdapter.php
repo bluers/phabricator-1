@@ -4,6 +4,11 @@ final class PhabricatorProjectHeraldAdapter extends HeraldAdapter {
 
   private $project;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   protected function newObject() {
     return new PhabricatorProject();
   }

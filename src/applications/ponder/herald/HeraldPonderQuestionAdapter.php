@@ -4,6 +4,11 @@ final class HeraldPonderQuestionAdapter extends HeraldAdapter {
 
   private $question;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   protected function newObject() {
     return new PonderQuestion();
   }

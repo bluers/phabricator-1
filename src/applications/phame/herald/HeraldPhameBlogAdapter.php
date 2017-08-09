@@ -4,6 +4,11 @@ final class HeraldPhameBlogAdapter extends HeraldAdapter {
 
   private $blog;
 
+  public function isAvailableToUser(PhabricatorUser $viewer)
+  {
+    return false;
+  }
+
   protected function newObject() {
     return new PhameBlog();
   }

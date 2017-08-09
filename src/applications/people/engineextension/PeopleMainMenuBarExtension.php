@@ -90,6 +90,7 @@ final class PeopleMainMenuBarExtension
         ->setName(pht('Manage'))
         ->setHref('/people/manage/'.$viewer->getID().'/'));
 
+
     if ($application) {
       $help_links = $application->getHelpMenuItems($viewer);
       if ($help_links) {
