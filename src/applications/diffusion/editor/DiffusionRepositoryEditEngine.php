@@ -263,14 +263,14 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Rename the repository.'))
         ->setConduitTypeDescription(pht('New repository name.'))
         ->setValue($object->getName()),
-      id(new PhabricatorTextEditField())
+      /*id(new PhabricatorTextEditField())
         ->setKey('callsign')
         ->setLabel(pht('Callsign'))
         ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_CALLSIGN)
         ->setDescription(pht('The repository callsign.'))
         ->setConduitDescription(pht('Change the repository callsign.'))
         ->setConduitTypeDescription(pht('New repository callsign.'))
-        ->setValue($object->getCallsign()),
+        ->setValue($object->getCallsign()),*/
       id(new PhabricatorTextEditField())
         ->setKey('shortName')
         ->setLabel(pht('Short Name'))
