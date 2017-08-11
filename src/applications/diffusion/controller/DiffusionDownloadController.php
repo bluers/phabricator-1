@@ -115,7 +115,7 @@ final class DiffusionDownloadController extends DiffusionController {
       $commitIdentifierEncoded = str_replace('%2F', '/', urlencode($commitIdentifier));
 
       $commitEncoded = str_replace($commitIdentifier, $commitIdentifierEncoded, $commit);
-      $cmd = "bash -c \"export LANG=\"zh_CN.UTF-8\" && cd $tempdir_proj && svn export file://$localPath$commitEncoded $commitIdentifierEncoded && tar --format=ustar -cvzf $commitIdentifierEncoded.tar.gz $commitIdentifierEncoded\"";
+      $cmd = "bash -c \"export LANG=\"zh_CN.UTF-8\" && cd $tempdir_proj && svn export file://$localPath$commitEncoded $commitIdentifierEncoded\"";
       $output = exec_timeout($cmd, 30);
       $file_name = "$tempdir_proj"."$commitIdentifierEncoded.tar.gz";
 
@@ -128,6 +128,9 @@ final class DiffusionDownloadController extends DiffusionController {
           ->setMimeType('application/gzip')
           ->setContent(file_get_contents($file_name));
       }
+
+      $cmd = "bash -c \"export LANG=\"zh_CN.UTF-8\" && cd $tempdir_proj && tar --format=ustar -cvzf $commitIdentifierEncoded.tar.gz $commitIdentifierEncoded\"";
+      $output = exec_timeout($cmd, 30);
 
       return id(new AphrontFileResponse())
         ->setDownload("$name-$commitIdentifier.tar.gz")
