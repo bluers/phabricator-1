@@ -35,7 +35,7 @@ final class PhabricatorPeopleMakeDevController
     if ($request->isFormPost()) {
       id(new PhabricatorUserEditor())
         ->setActor($viewer)
-        ->makeDevUser($user, !$user->getIsAdmin());
+        ->makeDevUser($user, !$user->getIsDev());
 
       return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
