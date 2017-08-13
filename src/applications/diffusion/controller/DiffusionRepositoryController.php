@@ -309,12 +309,6 @@ final class DiffusionRepositoryController extends DiffusionController {
       $readme = null;
     }
 
-    $content[] = $this->buildBrowseDocTable(
-      $browsedoc_results,
-      $browsedoc_paths,
-      $browsedoc_exception,
-      $handles,
-      $browse_pager);
 
     if( $svnBranches != null && count($svnBranches) > 0 ){
       $content[] = $this->buildBrowseSvnBranchesTable(
@@ -332,10 +326,22 @@ final class DiffusionRepositoryController extends DiffusionController {
       $handles,
       $browse_pager);
 
-    $content[] = $this->buildHistoryTable(
-      $history_results,
-      $history,
-      $history_exception);
+    try {
+      $content[] = $this->buildBranchListTable($drequest);
+    } catch (Exception $ex) {
+      if (!$repository->isImporting()) {
+        $content[] = $this->renderStatusMessage(
+          pht('Unable to Load Branches'),
+          $ex->getMessage());
+      }
+    }
+
+    $content[] = $this->buildBrowseDocTable(
+      $browsedoc_results,
+      $browsedoc_paths,
+      $browsedoc_exception,
+      $handles,
+      $browse_pager);
 
     try {
       $content[] = $this->buildTagListTable($drequest);
@@ -346,16 +352,11 @@ final class DiffusionRepositoryController extends DiffusionController {
           $ex->getMessage());
       }
     }
-
-    try {
-      $content[] = $this->buildBranchListTable($drequest);
-    } catch (Exception $ex) {
-      if (!$repository->isImporting()) {
-        $content[] = $this->renderStatusMessage(
-          pht('Unable to Load Branches'),
-          $ex->getMessage());
-      }
-    }
+    
+    $content[] = $this->buildHistoryTable(
+      $history_results,
+      $history,
+      $history_exception);
 
     if ($readme) {
       $content[] = $readme;
