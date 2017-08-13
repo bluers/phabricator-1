@@ -352,7 +352,7 @@ final class DiffusionRepositoryController extends DiffusionController {
           $ex->getMessage());
       }
     }
-    
+
     $content[] = $this->buildHistoryTable(
       $history_results,
       $history,
@@ -462,7 +462,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Details'))
+      ->setHeaderText(pht('Repository URL'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($view);
 
