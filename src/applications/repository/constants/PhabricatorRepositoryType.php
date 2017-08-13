@@ -28,13 +28,13 @@ final class PhabricatorRepositoryType extends Phobject {
         'icon' => 'fa-git',
         'create.header' => pht('Create Git Repository'),
         'create.subheader' => pht('Create a new Git repository.'),
-      ),
+      ),/*
       self::REPOSITORY_TYPE_MERCURIAL => array(
         'name' => pht('Mercurial'),
         'icon' => 'fa-code-fork',
         'create.header' => pht('Create Mercurial Repository'),
         'create.subheader' => pht('Create a new Mercurial repository.'),
-      ),
+      ),*/
       self::REPOSITORY_TYPE_SVN => array(
         'name' => pht('Subversion'),
         'icon' => 'fa-database',

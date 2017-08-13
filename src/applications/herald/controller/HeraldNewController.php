@@ -248,7 +248,7 @@ final class HeraldNewController extends HeraldController {
     $rule_type_map = array_select_keys(
       $rule_type_map,
       array(
-        HeraldRuleTypeConfig::RULE_TYPE_PERSONAL,
+       // HeraldRuleTypeConfig::RULE_TYPE_PERSONAL,
         HeraldRuleTypeConfig::RULE_TYPE_OBJECT,
         HeraldRuleTypeConfig::RULE_TYPE_GLOBAL,
       )) + $rule_type_map;
@@ -258,12 +258,12 @@ final class HeraldNewController extends HeraldController {
       pht('You have permission to create and manage global rules.'),
       pht('You do not have permission to create or manage global rules.'));
 
-    $captions = array(
+    $captions = array(/*
       HeraldRuleTypeConfig::RULE_TYPE_PERSONAL =>
         pht(
           'Personal rules notify you about events. You own them, but they can '.
           'only affect you. Personal rules only trigger for objects you have '.
-          'permission to see.'),
+          'permission to see.'),*/
       HeraldRuleTypeConfig::RULE_TYPE_OBJECT =>
         pht(
           'Object rules notify anyone about events. They are bound to an '.

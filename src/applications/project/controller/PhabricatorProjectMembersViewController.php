@@ -35,11 +35,13 @@ final class PhabricatorProjectMembersViewController
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getMemberPHIDs());
 
+    /*
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getWatcherPHIDs());
+    */
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::ITEM_MEMBERS);
@@ -58,7 +60,7 @@ final class PhabricatorProjectMembersViewController
       ->setMainColumn(array(
         $object_box,
         $member_list,
-        $watcher_list,
+       // $watcher_list,
       ));
 
 
@@ -192,6 +194,7 @@ final class PhabricatorProjectMembersViewController
 
     $viewer_phid = $viewer->getPHID();
 
+    /*
     if (!$project->isUserMember($viewer_phid)) {
       $curtain->addAction(
         id(new PhabricatorActionView())
@@ -225,10 +228,11 @@ final class PhabricatorProjectMembersViewController
           ->setIcon('fa-eye-slash')
           ->setName(pht('Unwatch Project')));
     }
-
+    */
     $can_silence = $project->isUserMember($viewer_phid);
     $is_silenced = $this->isProjectSilenced($project);
 
+    /*
     if ($is_silenced) {
       $silence_text = pht('Enable Mail');
     } else {
@@ -242,7 +246,7 @@ final class PhabricatorProjectMembersViewController
         ->setHref("/project/silence/{$id}/")
         ->setWorkflow(true)
         ->setDisabled(!$can_silence));
-
+    */
     $can_add = $can_edit && $supports_edit;
 
     $curtain->addAction(
@@ -253,9 +257,11 @@ final class PhabricatorProjectMembersViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_add));
 
+
     $can_lock = $can_edit && $supports_edit && $this->hasApplicationCapability(
       ProjectCanLockProjectsCapability::CAPABILITY);
 
+    /*
     if ($is_locked) {
       $lock_name = pht('Unlock Project');
       $lock_icon = 'fa-unlock';
@@ -271,7 +277,7 @@ final class PhabricatorProjectMembersViewController
         ->setHref($this->getApplicationURI("lock/{$id}/"))
         ->setDisabled(!$can_lock)
         ->setWorkflow(true));
-
+    */
     return $curtain;
   }
 

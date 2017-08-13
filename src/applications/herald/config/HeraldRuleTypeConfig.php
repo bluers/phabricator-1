@@ -8,7 +8,7 @@ final class HeraldRuleTypeConfig extends Phobject {
 
   public static function getRuleTypeMap() {
     $map = array(
-      self::RULE_TYPE_PERSONAL => pht('Personal'),
+    //  self::RULE_TYPE_PERSONAL => pht('Personal'),
       self::RULE_TYPE_OBJECT => pht('Object'),
       self::RULE_TYPE_GLOBAL => pht('Global'),
     );
