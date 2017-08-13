@@ -240,6 +240,23 @@ final class PhabricatorPeopleSearchEngine
     $request = $this->getRequest();
     $viewer = $this->requireViewer();
 
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withNames(array('开发人员待批准'))
+      ->needMembers(true)
+      ->needImages(true)
+      ->executeOne();
+
+    $member_list = null;
+    if ($project) {
+      $member_list = id(new PhabricatorJoinDevProjectMemberListView())
+        ->setUser($viewer)
+        ->setProject($project)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->setUserPHIDs($project->getMemberPHIDs());
+
+    }
+
     $list = new PHUIObjectItemListView();
 
     $is_approval = ($query->getQueryKey() == 'approval');
@@ -312,9 +329,22 @@ final class PhabricatorPeopleSearchEngine
       $list->addItem($item);
     }
 
+    if($member_list){
+      $result_list = $list;
+      $list = new PHUIObjectItemListView();
+      $list->appendChild($member_list);
+      $result_list->setHeader(pht('All'));
+      $list->appendChild($result_list);
+    }
+
     $result = new PhabricatorApplicationSearchResultView();
     $result->setObjectList($list);
-    $result->setNoDataString(pht('No accounts found.'));
+    if($member_list){
+      $result->setNoDataString(pht('All Users'));
+    }
+    else{
+      $result->setNoDataString(pht('No accounts found.'));
+    }
 
     return $result;
   }
