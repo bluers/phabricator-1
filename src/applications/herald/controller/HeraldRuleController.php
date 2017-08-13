@@ -696,6 +696,7 @@ final class HeraldRuleController extends HeraldController {
     $group_map = array();
     foreach ($action_map as $action_key => $action_name) {
       $group_key = $adapter->getActionGroupKey($action_key);
+      if($group_key == 'utility' || $group_key == 'support')continue;
       $group_map[$group_key][$action_key] = $action_name;
     }
 
