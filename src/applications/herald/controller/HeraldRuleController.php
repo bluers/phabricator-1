@@ -428,7 +428,8 @@ final class HeraldRuleController extends HeraldController {
     }
 
     $config_info = array();
-    $config_info['fields'] = $this->getFieldGroups($adapter, $field_map);
+    $fieldgroups = $this->getFieldGroups($adapter, $field_map);
+    $config_info['fields'] = $fieldgroups;
     $config_info['conditions'] = $all_conditions;
     $config_info['actions'] = $this->getActionGroups($adapter, $action_map);
     $config_info['valueMap'] = array();
@@ -681,6 +682,8 @@ final class HeraldRuleController extends HeraldController {
     $group_map = array();
     foreach ($field_map as $field_key => $field_name) {
       $group_key = $adapter->getFieldGroupKey($field_key);
+      if($group_key == "related" || $group_key == "herald" || $group_key == 'edit' || $group_key == 'support')continue;
+
       $group_map[$group_key][$field_key] = $field_name;
     }
 
