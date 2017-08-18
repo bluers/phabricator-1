@@ -275,22 +275,27 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browsedoc_exception = $ex;
     }
 
-    try{
+    try {
       $svnBranches_exception = null;
-      $svnBranches_results = $this->browseSvnBranchesFuture->resolve();
-      $svnBranches = DiffusionBrowseResultSet::newFromConduit(
-        $svnBranches_results);
-      $svnBranches = $svnBranches->getPaths();
-      $svnBranches = $browse_pager->sliceResults($svnBranches);
+      $svnBranches = null;
+      $svnBranches_results = null;
+      
+      if ($this->browseSvnBranchesFuture) {
+        $svnBranches_results = $this->browseSvnBranchesFuture->resolve();
+        $svnBranches = DiffusionBrowseResultSet::newFromConduit(
+          $svnBranches_results);
+        $svnBranches = $svnBranches->getPaths();
+        $svnBranches = $browse_pager->sliceResults($svnBranches);
 
-      foreach ($svnBranches as $item) {
-        $data = $item->getLastCommitData();
-        if ($data) {
-          if ($data->getCommitDetail('authorPHID')) {
-            $phids[$data->getCommitDetail('authorPHID')] = true;
-          }
-          if ($data->getCommitDetail('committerPHID')) {
-            $phids[$data->getCommitDetail('committerPHID')] = true;
+        foreach ($svnBranches as $item) {
+          $data = $item->getLastCommitData();
+          if ($data) {
+            if ($data->getCommitDetail('authorPHID')) {
+              $phids[$data->getCommitDetail('authorPHID')] = true;
+            }
+            if ($data->getCommitDetail('committerPHID')) {
+              $phids[$data->getCommitDetail('committerPHID')] = true;
+            }
           }
         }
       }
