@@ -279,7 +279,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $svnBranches_exception = null;
       $svnBranches = null;
       $svnBranches_results = null;
-      
+
       if ($this->browseSvnBranchesFuture) {
         $svnBranches_results = $this->browseSvnBranchesFuture->resolve();
         $svnBranches = DiffusionBrowseResultSet::newFromConduit(
@@ -604,7 +604,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $panel = new PHUIObjectBoxView();
     $header = new PHUIHeaderView();
-    $header->setHeader(pht('Tags'));
+    $header->setHeader(pht('Releases'));
 
     if ($more_tags) {
       $header->setSubheader(
