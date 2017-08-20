@@ -41,6 +41,33 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $need_pull = array();
     $rows = array();
     $show_edit = false;
+
+    $contains_trunk = false;
+    $contains_tags = false;
+    $contains_branches = false;
+    $contains_docs = false;
+
+    foreach ($this->paths as $path){
+      $file_type = $path->getFileType();
+      if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+        $path_name = $path->getPath();
+        if($path_name == "trunk"){
+          $contains_trunk = true;
+        }
+        if($path_name == "docs"){
+          $contains_docs = true;
+        }
+        if($path_name == "tags"){
+          $contains_tags = true;
+        }
+        if($path_name == "branches" || $path_name == "branchs"){
+          $contains_branches = true;
+        }
+      }
+    }
+
+    $show_svn_hint = $contains_branches || $contains_tags || $contains_docs || $contains_trunk;
+
     foreach ($this->paths as $path) {
       $full_path = $base_path.$path->getPath();
 
@@ -97,14 +124,41 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
       }
 
-      $rows[] = array(
-        $history_link,
-        $browse_link,
-        idx($dict, 'lint'),
-        $dict['commit'],
-        $dict['details'],
-        $dict['date'],
-      );
+      if($show_svn_hint){
+        $svn_hint = "";
+        if($path->getPath() == "branches" || $path->getPath() == "branchs"){
+          $svn_hint = pht("该目录的子目录对应了SVN分支");
+        }
+        if($path->getPath() == "docs"){
+          $svn_hint = pht("该目录保存了项目文档");
+        }
+        if($path->getPath() == "tags"){
+          $svn_hint = pht("该目录的子目录为发布的版本");
+        }
+        if($path->getPath() == "trunk"){
+          $svn_hint = pht("该目录对应SVN主分支");
+        }
+        $rows[] = array(
+          $history_link,
+          $browse_link,
+          idx($dict, 'lint'),
+          $dict['commit'],
+          $dict['details'],
+          $svn_hint,
+          $dict['date'],
+        );
+      }
+      else{
+        $rows[] = array(
+          $history_link,
+          $browse_link,
+          idx($dict, 'lint'),
+          $dict['commit'],
+          $dict['details'],
+          $dict['date'],
+        );
+      }
+
     }
 
     if ($need_pull) {
@@ -125,33 +179,68 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $lint = $request->getLint();
 
     $view = new AphrontTableView($rows);
-    $view->setHeaders(
-      array(
-        null,
-        pht('Path'),
-        ($lint ? $lint : pht('Lint')),
-        pht('Modified'),
-        pht('Commit Details'),
-        pht('Committed'),
-      ));
-    $view->setColumnClasses(
-      array(
-        'nudgeright',
-        '',
-        '',
-        '',
-        'wide',
-        'right',
-      ));
-    $view->setColumnVisibility(
-      array(
-        true,
-        true,
-        $show_lint,
-        true,
-        true,
-        true,
-      ));
+    if($show_svn_hint){
+      $view->setHeaders(
+        array(
+          null,
+          pht('Path'),
+          ($lint ? $lint : pht('Lint')),
+          pht('Modified'),
+          pht('Commit Details'),
+          pht('Details'),
+          pht('Committed'),
+        ));
+      $view->setColumnClasses(
+        array(
+          'nudgeright',
+          '',
+          '',
+          '',
+          '',
+          'wide',
+          'right',
+        ));
+      $view->setColumnVisibility(
+        array(
+          true,
+          true,
+          $show_lint,
+          true,
+          true,
+          true,
+          true,
+        ));
+    }
+    else{
+      $view->setHeaders(
+        array(
+          null,
+          pht('Path'),
+          ($lint ? $lint : pht('Lint')),
+          pht('Modified'),
+          pht('Commit Details'),
+          pht('Committed'),
+        ));
+      $view->setColumnClasses(
+        array(
+          'nudgeright',
+          '',
+          '',
+          '',
+          'wide',
+          'right',
+        ));
+      $view->setColumnVisibility(
+        array(
+          true,
+          true,
+          $show_lint,
+          true,
+          true,
+          true,
+        ));
+    }
+
 
     $view->setDeviceVisibility(
       array(
