@@ -6,7 +6,8 @@ final class PhabricatorSubscriptionsCurtainExtension
   const EXTENSIONKEY = 'subscriptions.subscribers';
 
   public function shouldEnableForObject($object) {
-    return ($object instanceof PhabricatorSubscribableInterface) && !($object instanceof PhabricatorRepositoryCommit);
+    return ($object instanceof PhabricatorSubscribableInterface) && !($object instanceof PhabricatorRepositoryCommit)
+      && !($object instanceof DifferentialRevision);
   }
 
   public function getExtensionApplication() {

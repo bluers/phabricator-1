@@ -39,7 +39,8 @@ final class PhabricatorActionListView extends AphrontTagView {
     $event->setUser($viewer);
     if ($this->object instanceof PhabricatorRepository
       || $this->object instanceof PhabricatorProject
-      || $this->object instanceof PhabricatorRepositoryCommit){
+      || $this->object instanceof PhabricatorRepositoryCommit
+      || $this->object instanceof DifferentialRevision){
       ;//对于代码库，屏蔽Flag for later和Award tokens
     }
     else{

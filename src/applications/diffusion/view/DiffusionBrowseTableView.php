@@ -131,7 +131,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         pht('Path'),
         ($lint ? $lint : pht('Lint')),
         pht('Modified'),
-        pht('Details'),
+        pht('Commit Details'),
         pht('Committed'),
       ));
     $view->setColumnClasses(

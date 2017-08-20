@@ -589,7 +589,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setIcon('fa-download')
         ->setName(pht('Download Raw Diff'))
         ->setHref($request_uri->alter('download', 'true')));
-
+/*
     $relationship_list = PhabricatorObjectRelationshipList::newForObject(
       $viewer,
       $revision);
@@ -609,7 +609,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if ($relationship_submenu) {
       $curtain->addAction($relationship_submenu);
     }
-
+*/
     return $curtain;
   }
 

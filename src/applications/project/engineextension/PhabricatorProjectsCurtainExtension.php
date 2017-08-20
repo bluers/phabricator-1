@@ -6,7 +6,8 @@ final class PhabricatorProjectsCurtainExtension
   const EXTENSIONKEY = 'projects.projects';
 
   public function shouldEnableForObject($object) {
-    return ($object instanceof PhabricatorProjectInterface) && !($object instanceof  PhabricatorRepositoryCommit);
+    return ($object instanceof PhabricatorProjectInterface) && !($object instanceof  PhabricatorRepositoryCommit)
+      && !($object instanceof  DifferentialRevision);
   }
 
   public function getExtensionApplication() {
