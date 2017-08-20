@@ -810,12 +810,12 @@ final class DiffusionCommitController extends DiffusionController {
     $relationship_list = PhabricatorObjectRelationshipList::newForObject(
       $viewer,
       $commit);
-
+/* 屏蔽Edit Related Objects...
     $relationship_submenu = $relationship_list->newActionMenu();
     if ($relationship_submenu) {
       $curtain->addAction($relationship_submenu);
     }
-
+*/
     return $curtain;
   }
 
