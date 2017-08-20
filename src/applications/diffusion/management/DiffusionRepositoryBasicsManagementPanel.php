@@ -95,12 +95,12 @@ final class DiffusionRepositoryBasicsManagementPanel
         ->setName($activate_label)
         ->setDisabled(!$can_edit)
         ->setWorkflow(true),
-      id(new PhabricatorActionView())
+      /*id(new PhabricatorActionView())
         ->setName(pht('Delete Repository'))
         ->setIcon('fa-times')
         ->setHref($delete_uri)
         ->setDisabled(true)
-        ->setWorkflow(true),
+        ->setWorkflow(true),*/
     );
   }
 

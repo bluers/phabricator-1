@@ -1,5 +1,5 @@
 <?php
-
+/*
 final class DiffusionRepositoryBranchesManagementPanel
   extends DiffusionRepositoryManagementPanel {
 
@@ -94,3 +94,4 @@ final class DiffusionRepositoryBranchesManagementPanel
   }
 
 }
+*/

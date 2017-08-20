@@ -1,5 +1,5 @@
 <?php
-
+/*
 final class DiffusionRepositoryAutomationManagementPanel
   extends DiffusionRepositoryManagementPanel {
 
@@ -99,4 +99,4 @@ final class DiffusionRepositoryAutomationManagementPanel
     return $this->newBox(pht('Automation'), $view);
   }
 
-}
+}*/
