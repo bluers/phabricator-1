@@ -95,7 +95,7 @@ final class PhabricatorSubscriptionsUIEventListener
       return;
     }
 
-    if (!($object instanceof PhabricatorSubscribableInterface)) {
+    if (!($object instanceof PhabricatorSubscribableInterface) || $object instanceof PhabricatorRepositoryCommit) {
       // This object isn't subscribable.
       return;
     }
