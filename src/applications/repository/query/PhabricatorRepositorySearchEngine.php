@@ -187,7 +187,43 @@ final class PhabricatorRepositorySearchEngine
           }
         }
         else{
-          $repositories_groupby[""][] = $repository;
+            $policies = id(new PhabricatorPolicyQuery())
+              ->setViewer($viewer)
+              ->withPHIDs(array($owner))
+              ->execute();
+
+            if($policies) {
+              $policy = head($policies);
+              $rule_data = $policy->getRules();
+              $users = array();
+              $admin_user = null;
+              foreach ($rule_data as $rule) {
+                if ($rule["action"] == "allow" && $rule["rule"] == "PhabricatorUsersPolicyRule") {
+                  foreach ($rule["value"] as $userPHID) {
+                    $actor = id(new PhabricatorUser())->loadOneWhere(
+                      'phid = %s',
+                      $userPHID);
+
+                    if ($actor->getUserName() == "admin") {
+                      $admin_user = $actor->getUserName();
+                    }
+                    $users[] = $actor->getUserName();
+                  }
+                }
+              }//foreach ($rule_data as $rule)
+              if (count($users) > 0) {
+                if (count($users) == 1) {
+                  $users = array_diff($users, [$admin_user]);
+                  $repositories_groupby[$users[0]][] = $repository;
+                }
+                else{
+                  $repositories_groupby[""][] = $repository;
+                }
+              } else {
+                $repositories_groupby[""][] = $repository;
+              }
+            }
+            else $repositories_groupby[""][] = $repository;
         }
       }
     }
