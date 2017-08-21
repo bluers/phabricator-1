@@ -119,7 +119,7 @@ final class PhabricatorProjectIconSet
         ->setKey($spec['key'])
         ->setIsDisabled(idx($spec, 'disabled'))
         ->setIcon($spec['icon'])
-        ->setLabel($spec['name']);
+        ->setLabel(pht($spec['name']));
     }
 
     return $icons;
@@ -146,14 +146,23 @@ final class PhabricatorProjectIconSet
 
   public static function getIconName($key) {
     $spec = self::getIconSpec($key);
-    return idx($spec, 'name', null);
+    return pht(idx($spec, 'name', null));
   }
 
   private static function getIconSpec($key) {
     $icons = self::getIconSpecifications();
     foreach ($icons as $icon) {
       if (idx($icon, 'key') === $key) {
-        return $icon;
+        $spec_local = array();
+        foreach ($icon as $key => $value){
+          if($key == 'name'){
+            $spec_local['name'] = pht($value);
+          }
+          else{
+            $spec_local[$key] = $value;
+          }
+        }
+        return $spec_local;
       }
     }
 
