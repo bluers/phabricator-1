@@ -96,11 +96,19 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
         $remove_uri = $this->getRemoveURI($user_phid);
 
         $item->addAction(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setHref($remove_uri)
+            ->setIcon('fa-times')
+            ->setText(pht('Deny'))
+            ->addClass('mml')
+            ->setColor(PHUIButtonView::GREY)/*
+            ->setText(pht('First'));
           id(new PHUIListItemView())
             ->setIcon('fa-times')
             ->setName(pht('Deny'))
             ->setHref($remove_uri)
-            ->setWorkflow(true));
+            ->setWorkflow(true)*/);
       }
 
       $list->addItem($item);

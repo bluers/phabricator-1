@@ -24,11 +24,11 @@ final class PhabricatorPeopleSearchEngine
         ->setKey('usernames')
         ->setAliases(array('username'))
         ->setDescription(pht('Find users by exact username.')),
-      id(new PhabricatorSearchTextField())
+      /*id(new PhabricatorSearchTextField())
         ->setLabel(pht('Name Contains'))
         ->setKey('nameLike')
         ->setDescription(
-          pht('Find users whose usernames contain a substring.')),
+          pht('Find users whose usernames contain a substring.')),*/
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Administrators'))
         ->setKey('isAdmin')
@@ -51,7 +51,7 @@ final class PhabricatorPeopleSearchEngine
           pht(
             'Pass true to find only disabled users, or false to omit '.
             'disabled users.')),
-      id(new PhabricatorSearchThreeStateField())
+      /*id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Bots'))
         ->setKey('isBot')
         ->setAliases(array('isSystemAgent'))
@@ -72,7 +72,7 @@ final class PhabricatorPeopleSearchEngine
         ->setDescription(
           pht(
             'Pass true to find only mailing lists, or false to omit '.
-            'mailing lists.')),
+            'mailing lists.')),*/
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Needs Approval'))
         ->setKey('needsApproval')
@@ -87,7 +87,7 @@ final class PhabricatorPeopleSearchEngine
     );
 
     $viewer = $this->requireViewer();
-    if ($viewer->getIsAdmin()) {
+    /*if ($viewer->getIsAdmin()) {
       $fields[] = id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Has MFA'))
         ->setKey('mfa')
@@ -99,8 +99,9 @@ final class PhabricatorPeopleSearchEngine
           pht(
             'Pass true to find only users who are enrolled in MFA, or false '.
             'to omit these users.'));
-    }
+    }*/
 
+    /*
     $fields[] = id(new PhabricatorSearchDateField())
       ->setKey('createdStart')
       ->setLabel(pht('Joined After'))
@@ -112,7 +113,7 @@ final class PhabricatorPeopleSearchEngine
       ->setLabel(pht('Joined Before'))
       ->setDescription(
         pht('Find user accounts created before a given time.'));
-
+    */
     return $fields;
   }
 

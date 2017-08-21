@@ -154,7 +154,7 @@ class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
-  public function addAction(PHUIListItemView $action) {
+  public function addAction($action) {
     if (count($this->actions) >= 3) {
       throw new Exception(pht('Limit 3 actions per item.'));
     }
@@ -650,7 +650,9 @@ class PHUIObjectItemView extends AphrontTagView {
       Javelin::initBehavior('phabricator-tooltips');
 
       foreach (array_reverse($this->actions) as $action) {
-        $action->setRenderNameAsTooltip(true);
+        if($action instanceof PHUIListItemView)
+          $action->setRenderNameAsTooltip(false);
+
         $actions[] = $action;
       }
       $actions = phutil_tag(
