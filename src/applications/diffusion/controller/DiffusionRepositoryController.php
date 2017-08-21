@@ -324,12 +324,6 @@ final class DiffusionRepositoryController extends DiffusionController {
         $browse_pager);
     }
 
-    $content[] = $this->buildBrowseTable(
-      $browse_results,
-      $browse_paths,
-      $browse_exception,
-      $handles,
-      $browse_pager);
 
     try {
       $content[] = $this->buildBranchListTable($drequest);
@@ -340,6 +334,13 @@ final class DiffusionRepositoryController extends DiffusionController {
           $ex->getMessage());
       }
     }
+
+    $content[] = $this->buildBrowseTable(
+      $browse_results,
+      $browse_paths,
+      $browse_exception,
+      $handles,
+      $browse_pager);
 
     $content[] = $this->buildBrowseDocTable(
       $browsedoc_results,
@@ -770,7 +771,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_panel = id(new PHUIObjectBoxView())
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     $header = id(new PHUIHeaderView())
-      ->setHeader($repository->getName());
+      ->setHeader(pht('Directory Specification: %s', $repository->getName()));
 
     $icon = id(new PHUIIconView())
       ->setIcon('fa-folder-open');

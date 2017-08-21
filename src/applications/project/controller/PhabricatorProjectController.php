@@ -101,7 +101,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     if (!$this->profileMenu) {
       $engine = $this->getProfileMenuEngine();
       if ($engine) {
-        $this->profileMenu = $engine->buildNavigation();
+        $project = $this->getProject();
+         $this->profileMenu = $engine->buildNavigationForProject($project);
       }
     }
 

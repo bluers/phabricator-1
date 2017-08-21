@@ -401,6 +401,118 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->navigation;
   }
 
+  public function buildNavigationForProject(PhabricatorProject $project) {
+
+    $nav = id(new AphrontSideNavFilterView())
+      ->setIsProfileMenu(true)
+      ->setBaseURI(new PhutilURI($this->getItemURI('')));
+
+    $menu_items = $this->getItems();
+    $icon = $project->getIcon();
+    if($icon == "group"){
+      //基本信息 成员列表 成员变化情况
+      //project.picture, project.members, project.manage
+      $menu_items_old = $menu_items;
+      $menu_items = array(null,null,null,null);
+      foreach ($menu_items_old as $menu_item){
+        if($menu_item->getMenuItemKey() == PhabricatorProjectPictureProfileMenuItem::MENUITEMKEY){
+          $menu_items[0] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectDetailsProfileMenuItem::MENUITEMKEY){
+          $menu_item->setMenuItemProperty("name",pht('Members History'));
+          $menu_items[3] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectMembersProfileMenuItem::MENUITEMKEY){
+          $menu_items[2] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectManageProfileMenuItem::MENUITEMKEY){
+          $menu_item->setMenuItemProperty("name",pht('Basics'));
+          $menu_items[1] = $menu_item;
+        }
+      }
+    }
+    else if($icon == "organization"){
+
+    }
+    else if($icon == "project" || $icon == "tag"){
+      //编辑详情，编辑图片，归档项目
+      //project.picture, project.editdetails, project.archive
+      $menu_items_old = $menu_items;
+      $menu_items = array(null,null,null,null,null);
+      foreach ($menu_items_old as $menu_item){
+        if($menu_item->getMenuItemKey() == PhabricatorProjectPictureProfileMenuItem::MENUITEMKEY){
+          $menu_items[0] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectDetailsProfileMenuItem::MENUITEMKEY){
+          $menu_items[1] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectEditDetailsProfileMenuItem::MENUITEMKEY){
+          $menu_items[2] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectEditPictureProfileMenuItem::MENUITEMKEY)
+        {
+          $menu_items[3] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectArchiveProfileMenuItem::MENUITEMKEY)
+        {
+          $menu_items[4] = $menu_item;
+        }
+      }
+    }
+    $filtered_items = array();
+    foreach ($menu_items as $menu_item) {
+      if ($menu_item->isDisabled()) {
+        continue;
+      }
+      $filtered_items[] = $menu_item;
+    }
+    $filtered_groups = mgroup($filtered_items, 'getMenuItemKey');
+    foreach ($filtered_groups as $group) {
+      $first_item = head($group);
+      $first_item->willBuildNavigationItems($group);
+    }
+
+    foreach ($menu_items as $menu_item) {
+      if ($menu_item->isDisabled()) {
+        continue;
+      }
+
+      $items = $menu_item->buildNavigationMenuItems();
+      foreach ($items as $item) {
+        $this->validateNavigationMenuItem($item);
+      }
+
+      // If the item produced only a single item which does not otherwise
+      // have a key, try to automatically assign it a reasonable key. This
+      // makes selecting the correct item simpler.
+
+      if (count($items) == 1) {
+        $item = head($items);
+        if ($item->getKey() === null) {
+          $default_key = $menu_item->getDefaultMenuItemKey();
+          $item->setKey($default_key);
+        }
+      }
+
+      foreach ($items as $item) {
+        $nav->addMenuItem($item);
+      }
+    }
+
+    $nav->selectFilter(null);
+
+    $menu_items = $nav->getMenu()->getItems();
+    $menu_count = count($menu_items);
+    if($menu_count > 0){
+      $menu_type = $menu_items[$menu_count - 1]->getType();
+      if (strcmp(PHUIListItemView::TYPE_LABEL, $menu_type) == 0){
+        $nav->getMenu()->removeMenuItemAtIndex($menu_count - 1);
+      }
+    }
+
+    return $nav;
+  }
+
   private function getItems() {
     if ($this->items === null) {
       $this->items = $this->loadItems(self::MODE_COMBINED);

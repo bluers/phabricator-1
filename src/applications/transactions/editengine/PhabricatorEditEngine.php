@@ -1204,7 +1204,7 @@ abstract class PhabricatorEditEngine
       $crumbs->setBorder(true);
     }
 
-    if ($action_button) {
+    if ($action_button && $viewer->getIsAdmin() == 1) {
       $header->addActionLink($action_button);
     }
 
@@ -1460,6 +1460,7 @@ abstract class PhabricatorEditEngine
     if (count($specs) > 1) {
       $menu_icon = 'fa-caret-square-o-down';
       $menu_name = $this->getObjectCreateShortText();
+      $menu_name = pht('Create');
       $workflow = false;
       $disabled = false;
 
