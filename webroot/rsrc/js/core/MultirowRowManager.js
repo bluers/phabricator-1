@@ -63,7 +63,7 @@ JX.install('MultirowRowManager', {
           { className: 'button simple',
             sigil: JX.MultirowRowManager._removeSigil
           },
-          'Remove'));
+          '移除'));
 
       JX.DOM.appendContent(row, removeButton);
       return row;

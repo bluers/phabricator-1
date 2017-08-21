@@ -314,6 +314,12 @@ final class DiffusionRepositoryController extends DiffusionController {
       $readme = null;
     }
 
+    $content[] = $this->buildBrowseTable(
+      $browse_results,
+      $browse_paths,
+      $browse_exception,
+      $handles,
+      $browse_pager);
 
     if( $svnBranches != null && count($svnBranches) > 0 ){
       $content[] = $this->buildBrowseSvnBranchesTable(
@@ -334,13 +340,6 @@ final class DiffusionRepositoryController extends DiffusionController {
           $ex->getMessage());
       }
     }
-
-    $content[] = $this->buildBrowseTable(
-      $browse_results,
-      $browse_paths,
-      $browse_exception,
-      $handles,
-      $browse_pager);
 
     $content[] = $this->buildBrowseDocTable(
       $browsedoc_results,

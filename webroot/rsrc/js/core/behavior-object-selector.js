@@ -138,7 +138,7 @@ JX.behavior('phabricator-object-selector', function(config) {
     var select_object_button = JX.$N(
       'a',
       {href: '#', sigil: 'object-attacher', className: 'button small grey'},
-      attach ? 'Select' : 'Remove');
+      attach ? '选择' : '移除');
 
     var cells = [
       JX.$N('td', {}, view_object_link),
