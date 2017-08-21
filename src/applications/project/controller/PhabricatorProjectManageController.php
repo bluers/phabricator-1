@@ -89,7 +89,7 @@ final class PhabricatorProjectManageController
         ->setHref($this->getApplicationURI("edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
+/*
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Menu'))
@@ -97,7 +97,7 @@ final class PhabricatorProjectManageController
         ->setHref($this->getApplicationURI("{$id}/item/configure/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
+*/
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Picture'))

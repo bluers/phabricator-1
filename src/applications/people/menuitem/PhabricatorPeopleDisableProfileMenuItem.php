@@ -46,10 +46,18 @@ final class PhabricatorPeopleDisableProfileMenuItem
     $user = $config->getProfileObject();
     $id = $user->getID();
 
+    if ($user->getIsDisabled()) {
+      $disable_icon = 'fa-check-circle-o';
+      $disable_name = pht('Enable User');
+    } else {
+      $disable_icon = 'fa-ban';
+      $disable_name = pht('Disable User');
+    }
+
     $item = $this->newItem()
       ->setHref("/people/disable/{$id}/")
-      ->setName($this->getDisplayName($config))
-      ->setIcon('fa-ban');
+      ->setName($disable_name)
+      ->setIcon($disable_icon);
 
     return array(
       $item,

@@ -98,7 +98,7 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-times')
-            ->setName(pht('Remove'))
+            ->setName(pht('Deny'))
             ->setHref($remove_uri)
             ->setWorkflow(true));
       }

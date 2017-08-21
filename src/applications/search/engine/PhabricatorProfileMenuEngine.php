@@ -432,7 +432,29 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
     else if($icon == "organization"){
-
+      //编辑详情，编辑图片，归档项目
+      //project.picture, project.editdetails, project.archive
+      $menu_items_old = $menu_items;
+      $menu_items = array(null,null,null,null,null);
+      foreach ($menu_items_old as $menu_item){
+        if($menu_item->getMenuItemKey() == PhabricatorProjectPictureProfileMenuItem::MENUITEMKEY){
+          $menu_items[0] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectDetailsProfileMenuItem::MENUITEMKEY){
+          $menu_items[1] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectEditDetailsProfileMenuItem::MENUITEMKEY){
+          $menu_items[2] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectEditPictureProfileMenuItem::MENUITEMKEY)
+        {
+          $menu_items[3] = $menu_item;
+        }
+        if($menu_item->getMenuItemKey() == PhabricatorProjectArchiveProfileMenuItem::MENUITEMKEY)
+        {
+          $menu_items[4] = $menu_item;
+        }
+      }
     }
     else if($icon == "project" || $icon == "tag"){
       //编辑详情，编辑图片，归档项目
