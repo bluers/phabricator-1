@@ -712,7 +712,7 @@ final class DiffusionRepositoryController extends DiffusionController {
               'action' => 'pathtree',
             )),
         ));
-
+/*
       $form = id(new AphrontFormView())
         ->setUser($viewer)
         ->appendChild(
@@ -725,7 +725,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $locate_panel = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Locate File'))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->appendChild($form_box);
+        ->appendChild($form_box);*/ //屏蔽Locate File
     }
     return $locate_panel;
   }

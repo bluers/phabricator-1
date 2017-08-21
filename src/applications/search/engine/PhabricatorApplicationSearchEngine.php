@@ -275,10 +275,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         self::BUCKET_NONE => pht('No Bucketing'),
       ) + mpull($buckets, 'getResultBucketName');
 
-      $fields[] = id(new PhabricatorSearchSelectField())
+      /*$fields[] = id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Bucket'))
         ->setKey('bucket')
-        ->setOptions($bucket_options);
+        ->setOptions($bucket_options);*/
     }
 
     $field_map = array();
@@ -489,7 +489,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $menu->newLink($query->getQueryName(), $uri, 'query/'.$key);
     }
 
-    if ($viewer->isLoggedIn()) {
+    if ($viewer->isLoggedIn() && $viewer->getIsAdmin()) {
       $manage_uri = $this->getQueryManagementURI();
       $menu->newLink(pht('Edit Queries...'), $manage_uri, 'query/edit');
     }

@@ -21,7 +21,7 @@ final class PhabricatorProjectProfileController
     $icon_name = $project->getDisplayIconName();
     $tag = id(new PHUITagView())
       ->setIcon($icon)
-      ->setName($icon_name)
+      ->setName(pht($icon_name))
       ->addClass('project-view-header-tag')
       ->setType(PHUITagView::TYPE_SHADE);
 
