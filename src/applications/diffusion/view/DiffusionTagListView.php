@@ -208,9 +208,16 @@ final class DiffusionTagListView extends DiffusionView {
 
       $tag_name = $tag->getName();
 
+      if($this->handles == null || !isset($this->handles)){
+        $query = id(new PhabricatorObjectQuery())
+          ->setViewer($viewer)
+          ->withPHIDs($this->getRequiredHandlePHIDs());
+        $this->handles = $query->execute();
+      }
+
       $author = null;
       if ($commit && $commit->getAuthorPHID()) {
-        $author = $this->handles[$commit->getAuthorPHID()]->getAuthorName();
+        $author = $this->handles[$commit->getAuthorPHID()]->getUserName();
       } else if ($commit && $commit->getCommitData()) {
         $author = $commit->getCommitData()->getAuthorName();
       } else {
