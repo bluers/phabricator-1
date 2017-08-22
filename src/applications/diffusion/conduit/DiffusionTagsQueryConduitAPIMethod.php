@@ -305,7 +305,7 @@ final class DiffusionTagsQueryConduitAPIMethod
 
       $result_path = new DiffusionRepositoryTag();
       $result_path->setName($file_path);
-      $result_path->setCommitIdentifier($full_path);
+      $result_path->setFullPath($full_path);
       $result_path->setType("svn/tag");
       $result_path->setDescription($file_path);
       $result_path->setDescription($file['summary']);

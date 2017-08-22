@@ -55,7 +55,7 @@ final class DiffusionTagListView extends DiffusionView {
             'href' => $drequest->generateURI(
               array(
                 'action' => 'browse',
-                'path' => $tag->getCommitIdentifier(),
+                'path' => $tag->getFullPath(),
               )),
           ),
           $tag->getName());
@@ -252,7 +252,8 @@ final class DiffusionTagListView extends DiffusionView {
         "author"=>$author,
         "description"=>$description,
         "timestamp"=>$tag->getEpoch(),
-        "download_count"=>$download_count
+        "download_count"=>$download_count,
+        "fullPath" => $tag->getFullPath(),
       );
     }
 

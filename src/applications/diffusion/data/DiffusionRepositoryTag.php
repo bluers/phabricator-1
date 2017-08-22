@@ -8,6 +8,7 @@ final class DiffusionRepositoryTag extends Phobject {
   private $name;
   private $description;
   private $type;
+  private $fullPath;
 
   private $message = false;
 
@@ -77,6 +78,15 @@ final class DiffusionRepositoryTag extends Phobject {
     return $this->message;
   }
 
+  public function setFullPath($fullPath) {
+    $this->fullPath = $fullPath;
+    return $this;
+  }
+
+  public function getFullPath() {
+    return $this->fullPath;
+  }
+
   public function toDictionary() {
     $dict = array(
       'author' => $this->getAuthor(),
@@ -89,6 +99,9 @@ final class DiffusionRepositoryTag extends Phobject {
 
     if ($this->message !== false) {
       $dict['message'] = $this->message;
+    }
+    if ($this->fullPath){
+      $dict['fullPath'] = $this->fullPath;
     }
 
     return $dict;
@@ -103,7 +116,8 @@ final class DiffusionRepositoryTag extends Phobject {
         ->setCommitIdentifier($dict['commitIdentifier'])
         ->setName($dict['name'])
         ->setDescription($dict['description'])
-        ->setType($dict['type']);
+        ->setType($dict['type'])
+        ->setFullPath($dict['fullPath']);
 
       if (array_key_exists('message', $dict)) {
         $tag->attachMessage($dict['message']);
