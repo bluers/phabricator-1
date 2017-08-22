@@ -48,7 +48,14 @@ final class PhabricatorProjectArchiveProfileMenuItem
     $id = $project->getID();
 
     $name = $this->getDisplayName($config);
-    $icon = 'fa-ban';
+    if ($project->isArchived()) {
+      $icon = 'fa-check-circle-o';
+      $name = pht('Activate Project');
+    } else {
+      $icon = 'fa-ban';
+      $name = pht('Archive Project');
+    }
+
     $href = "/project/archive/{$id}/";
 
     $item = $this->newItem()
