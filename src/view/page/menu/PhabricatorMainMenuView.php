@@ -599,6 +599,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $user_dropdown = null;
     $user_tag = null;
     if ($viewer->isLoggedIn()) {
+      /*
       if (!$viewer->getIsEmailVerified()) {
         $bubble_id = celerity_generate_unique_node_id();
         $count_id = celerity_generate_unique_node_id();
@@ -657,6 +658,7 @@ final class PhabricatorMainMenuView extends AphrontView {
             'style' => 'display: none;',
           ));
       }
+      */
     }
 
     $dropdowns = array(
