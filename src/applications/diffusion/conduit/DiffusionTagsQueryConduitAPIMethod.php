@@ -248,9 +248,10 @@ final class DiffusionTagsQueryConduitAPIMethod
 
     $browse = queryfx_all(
       $conn_r,
-      'SELECT *, p.path pathName
-        FROM %T f JOIN %T p ON f.pathID = p.id
-        WHERE repositoryID = %d
+      'SELECT *, p.path pathName,authorPHID, c.summary
+        FROM %T f JOIN %T p JOIN repository_commit c ON f.pathID = p.id
+        AND svnCommit= c.commitIdentifier AND f.repositoryId=c.repositoryID
+        WHERE f.repositoryID = %d
           AND parentID = %d
           AND existed = 1
         AND (%Q)
@@ -307,6 +308,8 @@ final class DiffusionTagsQueryConduitAPIMethod
       $result_path->setCommitIdentifier($full_path);
       $result_path->setType("svn/tag");
       $result_path->setDescription($file_path);
+      $result_path->setDescription($file['summary']);
+      $result_path->setCommitIdentifier($file['svnCommit']);
 
       if ($count >= $offset) {
         $tags[] = $result_path;
