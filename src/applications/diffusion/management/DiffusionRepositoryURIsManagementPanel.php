@@ -20,7 +20,7 @@ final class DiffusionRepositoryURIsManagementPanel
   public function shouldEnableForRepository(
     PhabricatorRepository $repository)
   {
-    return false;
+    return true;
   }
 
   public function buildManagementPanelContent() {
