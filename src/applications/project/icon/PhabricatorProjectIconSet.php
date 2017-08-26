@@ -146,7 +146,11 @@ final class PhabricatorProjectIconSet
 
   public static function getIconName($key) {
     $spec = self::getIconSpec($key);
-    return pht(idx($spec, 'name', null));
+    $value = idx($spec, 'name', null);
+    if($value) {
+      return pht("$value");
+    }
+    return $value;
   }
 
   private static function getIconSpec($key) {
@@ -154,9 +158,9 @@ final class PhabricatorProjectIconSet
     foreach ($icons as $icon) {
       if (idx($icon, 'key') === $key) {
         $spec_local = array();
-        foreach ($icon as $key => $value){
-          if($key == 'name'){
-            $spec_local['name'] = pht($value);
+        foreach ($icon as $key => $value) {
+          if($key == 'name') {
+            $spec_local['name'] = pht("$value");
           }
           else{
             $spec_local[$key] = $value;

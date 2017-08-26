@@ -143,6 +143,32 @@ final class PhabricatorRepositoryEditor
         // The first time a repository is activated, clear the "new repository"
         // flag so we stop showing setup hints.
         if ($active) {
+          $newly_init = $object->getDetail('newly-initialized');
+          if($newly_init == true){
+            //如果是svn，自动创建四个目录
+            if($object->getVersionControlSystem() == 'svn'
+              && $object->getStatus() == PhabricatorRepository::STATUS_INACTIVE
+              && $object->isHosted()){
+              //创建trunk, docs, branches, tags
+              $repo = $object;
+              $localPath = $repo->getLocalPath();
+
+              $path = rtrim($localPath, '/');
+              execx('svnadmin create -- %s', $path);
+
+              $id = $repo->getID();
+              $tempdir = sys_get_temp_dir();
+
+              $tempdir_proj = sprintf("%s/%s/", $tempdir, rand());
+              exec(sprintf("mkdir -p %s", $tempdir_proj));
+              $cmd = "bash -c \"export LANG=\"zh_CN.UTF-8\" && cd $tempdir_proj && svn co file://$localPath $id && cd $id && mkdir tags && mkdir trunk && mkdir branches && mkdir docs && svn add tags && svn add trunk && svn add branches && svn add docs && svn commit -m 'init'\"";
+              exec_timeout($cmd, 30);
+
+              $object->writeStatusMessage(
+                PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+                PhabricatorRepositoryStatusMessage::CODE_OKAY);
+            }
+          }
           $object->setDetail('newly-initialized', false);
         }
 
