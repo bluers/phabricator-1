@@ -336,7 +336,7 @@ final class PhabricatorAuthRegisterController
         }
       }
 
-      $value_asdev = $request->getBool('asdev');
+      $value_asdev = $request->getBool('asdev', false);
 
       if (!$errors) {
         $image = $this->loadProfilePicture($account);
