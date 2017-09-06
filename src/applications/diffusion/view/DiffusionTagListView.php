@@ -73,13 +73,15 @@ final class DiffusionTagListView extends DiffusionView {
           $tag->getName());
       }
 
+      $svn_commit_link = $repository->getCommitURI($tag->getCommitIdentifier());
+
       $commit_link = phutil_tag(
         'a',
         array(
-          'href' => $drequest->generateURI(
+          'href' => $tag->getType()=='svn/tag'?$svn_commit_link:$drequest->generateURI(
             array(
-              'action' => $tag->getType()=='svn/tag'?'browse':'commit',
-              $tag->getType()=='svn/tag'?'path':'commit' => $tag->getCommitIdentifier(),
+              'action' => 'commit',
+              'commit' => $tag->getCommitIdentifier(),
             )),
         ),
           $repository->formatCommitName(
@@ -195,7 +197,7 @@ final class DiffusionTagListView extends DiffusionView {
         $tag_link = $drequest->generateURI(
               array(
                 'action' => 'browse',
-                'path' => $tag->getCommitIdentifier(),
+                'path' => $tag->getFullPath(),
               ))->getPath();
       }
       else{
