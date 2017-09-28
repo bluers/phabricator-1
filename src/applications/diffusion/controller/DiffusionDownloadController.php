@@ -99,7 +99,27 @@ final class DiffusionDownloadController extends DiffusionController {
     $drequest = $this->getDiffusionRequest();
     $commit = $drequest->getCommit();
     $repo = $drequest->getRepository();
-    $localPath = $repo->getLocalPath();
+    $localPath = "file://".$repo->getLocalPath();
+    if (!$repo->isHosted()) {
+      $display_never = PhabricatorRepositoryURI::DISPLAY_NEVER;
+
+      $uris = $repo->getURIs();
+      foreach ($uris as $uri) {
+        if ($uri->getIsDisabled()) {
+          continue;
+        }
+
+        if ($uri->getEffectiveDisplayType() == $display_never) {
+          continue;
+        }
+
+        if ($repo->isSVN()) {
+          if($uri->getEffectiveIOType() == PhabricatorRepositoryURI::IO_OBSERVE){
+            $localPath = (string)$uri->getDisplayURI();
+          }
+        }
+      }
+    }
     $name = $repo->getName();
     $tempdir = sys_get_temp_dir();
 
@@ -115,7 +135,7 @@ final class DiffusionDownloadController extends DiffusionController {
       $commitIdentifierEncoded = str_replace('%2F', '/', urlencode($commitIdentifier));
 
       $commitEncoded = str_replace($commitIdentifier, $commitIdentifierEncoded, $commit);
-      $cmd = "bash -c \"export LANG=\"zh_CN.UTF-8\" && cd $tempdir_proj && svn export file://$localPath$commitEncoded $commitIdentifierEncoded\"";
+      $cmd = "bash -c \"export LANG=\"zh_CN.UTF-8\" && cd $tempdir_proj && svn export $localPath$commitEncoded $commitIdentifierEncoded\"";
       $output = exec_timeout($cmd, 30);
       $file_name = "$tempdir_proj"."$commitIdentifierEncoded.tar.gz";
 
