@@ -125,6 +125,19 @@ final class DiffusionDownloadController extends DiffusionController {
             if(!$this->endsWith($localPath, "/")){
               $localPath = $localPath."/";
             }
+
+            $credential_phid = $repo->getCredentialPHID();
+
+            if (/*$is_http && !$is_svn &&*/ $credential_phid) {
+              $key = PassphrasePasswordKey::loadFromPHID(
+                $credential_phid,
+                PhabricatorUser::getOmnipotentUser());
+
+              $user = $key->getUsernameEnvelope()->openEnvelope();
+              $pass = $key->getPasswordEnvelope()->openEnvelope();
+              $localPath = "--no-auth-cache --username ".rawurlencode($user).' --password '.rawurlencode($pass)." $localPath";
+            }
+
           }
         }
       }
