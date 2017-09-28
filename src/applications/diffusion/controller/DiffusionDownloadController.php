@@ -115,7 +115,7 @@ final class DiffusionDownloadController extends DiffusionController {
 
         if ($repo->isSVN()) {
           if($uri->getEffectiveIOType() == PhabricatorRepositoryURI::IO_OBSERVE){
-            $localPath = (string)$uri->getDisplayURI();
+            $localPath = (string)$uri->getURIEnvelope()->openEnvelope();
           }
         }
       }
