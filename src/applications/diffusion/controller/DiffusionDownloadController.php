@@ -90,6 +90,12 @@ final class DiffusionDownloadController extends DiffusionController {
     return true;
   }
 
+  function endsWith($haystack, $needle) {
+    $length = strlen($needle);
+    $start =  $length *-1; //negative
+    return (substr($haystack, $start, $length) === $needle);
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $response = $this->loadDiffusionContext();
     if ($response) {
@@ -116,6 +122,9 @@ final class DiffusionDownloadController extends DiffusionController {
         if ($repo->isSVN()) {
           if($uri->getEffectiveIOType() == PhabricatorRepositoryURI::IO_OBSERVE){
             $localPath = (string)$uri->getURIEnvelope()->openEnvelope();
+            if(!$this->endsWith($localPath, "/")){
+              $localPath = $localPath."/";
+            }
           }
         }
       }
