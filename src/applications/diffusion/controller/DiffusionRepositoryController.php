@@ -172,7 +172,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         ));
     }
 
-    if ($this->needBranchFuture()) {
+    if ($this->needBranchFuture() && $drequest->getRepository()->getVersionControlSystem() != "svn") {
       $branch_limit = $this->getBranchLimit();
       $this->branchFuture = $this->callConduitMethod(
         'diffusion.branchquery',
@@ -515,7 +515,7 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildBranchListTable(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
 
-    if (!$this->needBranchFuture()) {
+    if (!$this->needBranchFuture() || $this->branchFuture == null) {
       return null;
     }
 

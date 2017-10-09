@@ -86,7 +86,125 @@ final class DiffusionBranchQueryConduitAPIMethod
   protected function getSVNResult(ConduitAPIRequest $request) {
     // Since SVN doesn't have meaningful branches, just return nothing for all
     // queries.
-    return array();
+    $branches = array();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $user = PhabricatorUser::getOmnipotentUser();
+
+    $query = id(new PhabricatorRepositoryQuery())
+      ->needProjectPHIDs(true)
+      ->needCommitCounts(true)
+      ->needMostRecentCommits(true)
+      ->withPHIDs(array($repository->getPHID()))
+      ->setViewer($user);
+
+    $repositories = $query->execute();
+    $repository = $repositories[$repository->getID()];
+
+
+
+    $params = array(
+      'repository' => $repository->getID(),
+      'user' => $user,
+      'blob' => null,
+      'commit' => null,
+      'path' => null,
+      'line' => null,
+      'branch' => null,
+      'lint' => null,
+    );
+
+    $drequest = DiffusionRequest::newFromDictionary($params);
+
+    $method = 'diffusion.browsequery';
+
+    if($repository->getMostRecentCommit() == null){
+      return $branches;
+    }
+
+    try {
+      $browseDocFuture = DiffusionQuery::callConduitWithDiffusionRequest(
+        $user,
+        $drequest,
+        $method,
+        array(
+          'commit' => $repository->getMostRecentCommit()->getCommitIdentifier(),
+          'path' => '/branches',
+          'limit' => 1000 + 1,
+        ), true);
+
+      $browsedoc_results = $browseDocFuture->resolve();
+      $browsedoc_results = DiffusionBrowseResultSet::newFromConduit(
+        $browsedoc_results);
+
+      $browsedoc_paths = $browsedoc_results->getPaths();
+
+      foreach ($browsedoc_paths as $item) {
+        $file_type = $item->getFileType();
+        if ($file_type != DifferentialChangeType::FILE_DIRECTORY) {
+          continue;
+        }
+        $ref = new DiffusionRepositoryRef();
+
+        $path = $item->getFullPath();
+        if(substr($path,0, 8) == "branches"){
+          $path = "branches_".substr($path,9);
+        }
+
+        $path = rtrim($path, '/');
+        if(strpos($path, '/') > 0){
+          $path = null;
+        }
+
+
+      if($path != null) {
+        $key = $repository->getPHID() . "_" . $path;
+        $download_count = PhabricatorRepositoryDownloads::getDownloads($key);
+      }
+      else{
+        $download_count = 0;
+      }
+
+        $ref->setRawFields(array("epoch" => $repository->getMostRecentCommit()->getEpoch(),
+          "fullPath" => "/".$item->getFullPath(),
+          "browseUri" => $drequest->generateURI(
+            array(
+              'action' => 'browse',
+              'path'   => "/".$item->getFullPath(),
+            ))->getPath(),
+          "downloadUri" => $drequest->generateURI(
+            array(
+              'action' => 'download',
+              'path'   => "/".$item->getFullPath(),
+            ))->getPath(),
+          "download_count" => $download_count,
+          ));
+        $ref->setCommitIdentifier($repository->getMostRecentCommit()->getCommitIdentifier());
+        $ref->setShortName($item->getPath());
+        $ref->setRefType(PhabricatorRepositoryRefCursor::TYPE_BRANCH);
+        $branches[] = $ref;
+
+        $data = $item->getLastCommitData();
+        if ($data) {
+          if ($data->getCommitDetail('authorPHID')) {
+            $phids[$data->getCommitDetail('authorPHID')] = true;
+          }
+          if ($data->getCommitDetail('committerPHID')) {
+            $phids[$data->getCommitDetail('committerPHID')] = true;
+          }
+        }
+      }
+
+      $browsedoc_exception = null;
+    } catch (Exception $ex) {
+      $browsedoc_paths = null;
+      $browsedoc_exception = $ex;
+    }
+
+
+
+    return mpull($branches, 'toDictionary');;
   }
 
   private function processBranchRefs(ConduitAPIRequest $request, array $refs) {

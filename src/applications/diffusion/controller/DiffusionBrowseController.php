@@ -1687,7 +1687,13 @@ final class DiffusionBrowseController extends DiffusionController {
     $commitIdentifier = $drequest->getSymbolicCommit();
     if($isSvn){
       $commitIdentifier = $drequest->getPath();
-      $commitIdentifier = substr($commitIdentifier,5);
+      if(substr($commitIdentifier,0, 4) == "tags"){
+        $commitIdentifier = substr($commitIdentifier,5);
+      }
+      else if(substr($commitIdentifier,0, 8) == "branches"){
+        $commitIdentifier = "branches_".substr($commitIdentifier,9);
+      }
+
       $commitIdentifier = rtrim($commitIdentifier, '/');
       if(strpos($commitIdentifier, '/') > 0){
         $commitIdentifier = null;
