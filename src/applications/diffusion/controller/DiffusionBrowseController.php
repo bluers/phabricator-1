@@ -1690,7 +1690,7 @@ final class DiffusionBrowseController extends DiffusionController {
       if(substr($commitIdentifier,0, 4) == "tags"){
         $commitIdentifier = substr($commitIdentifier,5);
       }
-      else if(substr($commitIdentifier,0, 8) == "branches"){
+      else if(strlen($commitIdentifier) > 9 && substr($commitIdentifier,0, 8) == "branches"){
         $commitIdentifier = "branches_".substr($commitIdentifier,9);
       }
 

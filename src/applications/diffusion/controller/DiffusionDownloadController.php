@@ -151,7 +151,13 @@ final class DiffusionDownloadController extends DiffusionController {
     if($repo->getVersionControlSystem() == 'svn'){
       $commit = $drequest->getPath();
 
-      $commitIdentifier = substr($commit,5);
+      if(strlen($commit) > 9 && substr($commit,0, 8) == "branches"){
+        $commitIdentifier = "branches_".substr($commit,9);
+      }
+      else{
+        $commitIdentifier = substr($commit,5);
+      }
+
       $commitIdentifier = rtrim($commitIdentifier, '/');
       $commitIdentifier = ltrim($commitIdentifier, '/');
       $commitIdentifierEncoded = str_replace('%2F', '/', urlencode($commitIdentifier));
@@ -1830,6 +1836,9 @@ final class DiffusionDownloadController extends DiffusionController {
     $commitIdentifier = $drequest->getSymbolicCommit();
     if($isSvn){
       $commitIdentifier = $drequest->getPath();
+      if(strlen($commitIdentifier) > 9 && substr($commitIdentifier,0, 8) == "branches"){
+        $commitIdentifier = "branches_".substr($commitIdentifier,9);
+      }
       $commitIdentifier = substr($commitIdentifier,5);
       $commitIdentifier = rtrim($commitIdentifier, '/');
     }

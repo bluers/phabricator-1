@@ -148,7 +148,7 @@ final class DiffusionBranchQueryConduitAPIMethod
         $ref = new DiffusionRepositoryRef();
 
         $path = $item->getFullPath();
-        if(substr($path,0, 8) == "branches"){
+        if(strlen($path) > 9 && substr($path,0, 8) == "branches"){
           $path = "branches_".substr($path,9);
         }
 
