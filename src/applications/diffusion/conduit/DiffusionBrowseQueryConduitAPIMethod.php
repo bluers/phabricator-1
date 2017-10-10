@@ -433,7 +433,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
     foreach ($browse as $key => $file) {
       // We need to strip out directories because we don't store last-modified
       // in the filesystem table.
-      if ($file['fileType'] != DifferentialChangeType::FILE_DIRECTORY) {
+      if (true) {// ($file['fileType'] != DifferentialChangeType::FILE_DIRECTORY) {
         $loadable_commits[] = $file['svnCommit'];
         $browse[$key]['hasCommit'] = true;
       }

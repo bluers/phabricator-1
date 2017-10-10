@@ -166,7 +166,7 @@ final class DiffusionBranchQueryConduitAPIMethod
         $download_count = 0;
       }
 
-        $ref->setRawFields(array("epoch" => $repository->getMostRecentCommit()->getEpoch(),
+        $ref->setRawFields(array("epoch" => $item->getLastModifiedCommit()?$item->getLastModifiedCommit()->getEpoch():$repository->getMostRecentCommit()->getEpoch(),
           "fullPath" => "/".$item->getFullPath(),
           "browseUri" => $drequest->generateURI(
             array(
@@ -179,6 +179,7 @@ final class DiffusionBranchQueryConduitAPIMethod
               'path'   => "/".$item->getFullPath(),
             ))->getPath(),
           "download_count" => $download_count,
+          "message" => $item->getLastCommitData()?$item->getLastCommitData()->getCommitMessage():null,
           ));
         $ref->setCommitIdentifier($repository->getMostRecentCommit()->getCommitIdentifier());
         $ref->setShortName($item->getPath());
