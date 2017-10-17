@@ -69,6 +69,11 @@ final class PeopleMainMenuBarExtension
       id(new PhabricatorActionView())
         ->appendChild($user_view));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Profile Picture'))
+        ->setHref('/people/picture/'.$viewer->getID().'/'));
+
     /*
     $view->addAction(
       id(new PhabricatorActionView())
